@@ -1,16 +1,13 @@
 from basic_neural_network import BasicNeuralNetwork
-from neuron import Neuron
 import numpy as np
 
 if __name__ == "__main__":
-    input_layer = []
-    output_layer = []
-    for i in range(3):
-        input_layer.append(Neuron(3, random=True))
-    output_layer.append(Neuron(1, random=True))
+    feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
+    labels = np.array([[1,0,0,1,1]])
+    labels = labels.reshape(5,1)
+    weights = np.random.rand(3,1)
+    bias = np.random.rand(1)
     # print(output_layer)
     #Creating the actual nnet
-    nnet = BasicNeuralNetwork()
-    nnet.add_layer(input_layer,0)
-    nnet.add_layer(output_layer,0)
-    nnet.train([0,0,1], [1])
+    nnet = BasicNeuralNetwork(weights=weights, biases=bias)
+    nnet.train(feature_set,labels, 20000)
