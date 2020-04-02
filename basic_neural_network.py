@@ -15,9 +15,12 @@ class BasicNeuralNetwork:
       lr -- Stands for learning rate and it ts the size of the movement once you
       start training it.
     """  
-    self.weights = weights
-    self.biases = biases
-    self.learning_rate = lr
+    if len(weights) != len(biases):
+      raise AttributeError("Weight and biases length do not match")      
+    else:
+      self.weights = weights
+      self.biases = biases
+      self.learning_rate = lr
 
   def add_layer(self, layer, bias):
     """Method that allows to add a new layer to the existing ones.
