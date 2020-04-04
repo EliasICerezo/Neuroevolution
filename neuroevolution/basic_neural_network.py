@@ -1,11 +1,12 @@
-from activation_functions import sigmoid, sigmoid_der
-from error_functions import MSE
+from neuroevolution.activation_functions import sigmoid, sigmoid_der
+from neuroevolution.error_functions import MSE
 import numpy as np
+import typing
 class BasicNeuralNetwork:
   """Class that implements the basic behaviour of a neural network.
   """
 
-  def __init__(self, weights = [], biases = [], lr = 0.05 ):
+  def __init__(self, weights, biases, lr = 0.05 ):
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
@@ -14,13 +15,13 @@ class BasicNeuralNetwork:
       biases -- biases corresponding to the layers of weights.
       lr -- Stands for learning rate and it ts the size of the movement once you
       start training it.
-    """  
-    if len(weights) != len(biases):
-      raise AttributeError("Weight and biases length do not match")      
-    else:
-      self.weights = weights
-      self.biases = biases
-      self.learning_rate = lr
+    """ 
+    if weights.shape[1] != biases.shape[0]:
+      raise AttributeError("Weight and biases length do not match") 
+         
+    self.weights = weights
+    self.biases = biases
+    self.learning_rate = lr
 
   def add_layer(self, layer, bias):
     """Method that allows to add a new layer to the existing ones.
@@ -35,14 +36,14 @@ class BasicNeuralNetwork:
     if len(self.weights) != len(self.biases):
       print("Lengths are not coincident")
   
-  def train(self, inputs, targets, epochs):
+  def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
     """Training method of the neural network.
     It optimized the weights for a given input
     Keyword Arguments:
       inputs -- the features to be predicted by the neural network
       targets -- the targets that match the features for this predictions.
-      epochs -- number of iterations of optimization that the neural network will
-      perform
+      epochs -- number of iterations of optimization that the neural network
+      will perform
     """  
     print(self.weights)
     for i in range(epochs):
@@ -81,9 +82,12 @@ class BasicNeuralNetwork:
     dcost_dpred = error
     dpred_dz = sigmoid_der(forward_pass)
     z_delta = dcost_dpred * dpred_dz
+    print(z_delta)
     return z_delta
 
   def weight_updating(self, delta, inputs):
+    print(inputs)
+    print(delta)
     self.weights -= self.learning_rate * np.dot(inputs, delta)
     for num in delta:
       self.biases[0] -= self.learning_rate * num

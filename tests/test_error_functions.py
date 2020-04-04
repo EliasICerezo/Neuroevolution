@@ -1,5 +1,5 @@
 import pytest
-from error_functions import MSE
+from neuroevolution.error_functions import MSE
 
 
 class TestErrorFunctions:
