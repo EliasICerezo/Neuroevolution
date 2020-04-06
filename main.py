@@ -1,4 +1,4 @@
-from basic_neural_network import BasicNeuralNetwork
+from neuroevolution.basic_neural_network import BasicNeuralNetwork
 import numpy as np
 
 if __name__ == "__main__":
@@ -10,4 +10,4 @@ if __name__ == "__main__":
     # print(output_layer)
     #Creating the actual nnet
     nnet = BasicNeuralNetwork(weights=weights, biases=bias)
-    nnet.train(feature_set,labels, 20000)
+    nnet.train(feature_set,labels, 1)
