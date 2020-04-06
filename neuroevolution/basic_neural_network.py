@@ -4,6 +4,11 @@ import numpy as np
 import typing
 class BasicNeuralNetwork:
   """Class that implements the basic behaviour of a neural network.
+  It represents the fully connected networks, so take into account that all the
+  links in between nodes will be found here.
+  It ensembles all the basics and it is generalized to match every architecure.
+  However it is important to know that since it will need to store derivatives
+  to calculate the backpropagation step, it may not be super eficient in memory
   """
 
   def __init__(self, layers:list, num_of_classes:int, input_size:int, lr = 0.05, activation_functs = None):
@@ -31,6 +36,9 @@ class BasicNeuralNetwork:
     self.__initialize_weithts_and_biases()
   
   def __initialize_weithts_and_biases(self):
+    """Function that initialize weights and biases randombly. The random values
+    are not uniformly distributed which can cause a slower convergence.
+    """
     np.random.seed = 42
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:
@@ -52,7 +60,8 @@ class BasicNeuralNetwork:
       loss = crossentropy_loss(targets,y_hat)
       self.loss.append(loss)
       self.backpropagation(inputs,y=targets,y_hat=y_hat)
-      self.weight_updating()
+      self.__weight_updating()
+      print(loss)
 
 
   def feed_forward(self, inputs):
@@ -101,7 +110,10 @@ class BasicNeuralNetwork:
       self.params['dl_wrt_w{}'.format(i)] = dl_wrt_w_i
       self.params['dl_wrt_b{}'.format(i)] = dl_wrt_b_i
 
-  def weight_updating(self):
+  def __weight_updating(self):
+    """In this fucnction we update the weights of the neural network using the 
+    derivatives calculated in the backpropagation pass.
+    """
     for i in range(len(self.layers)-1):
       self.params['W{}'.format(i+1)] = self.params[
                   'W{}'.format(i+1)] - self.learning_rate * self.params[
@@ -109,6 +121,3 @@ class BasicNeuralNetwork:
       self.params['b{}'.format(i+1)] = self.params[
                   'b{}'.format(i+1)] - self.learning_rate * self.params[
                   'dl_wrt_b{}'.format(i+1)]
-    
- 
-
