@@ -3,34 +3,25 @@ import pytest
 import pytest_mock
 import numpy as np
 
+
+
 class TestBasicNN:
-  # Tets for construction of the nn
-  def test_empty_construction_is_not_none(self):
-    nnet = BasicNeuralNetwork()
-    assert nnet
-  
-  def test_empty_construction_has_empty_weights(self):
-    nnet = BasicNeuralNetwork()
-    assert len(nnet.weights)==0
-  
-  def test_empty_construction_has_empty_biases(self):
-    nnet = BasicNeuralNetwork()
-    assert len(nnet.biases)==0
   
   def test_empty_construction_has_a_greater_than_zero_lr(self):
-    nnet = BasicNeuralNetwork()
+    a = np.array([[1]])
+    nnet = BasicNeuralNetwork(a,a)
     assert nnet.learning_rate > 0
   
   def test_construction_without_matching_w_n_b_raises_exception(self):
     w = [1]
-    b = []
+    b = [0]
     with pytest.raises(AttributeError):
       nnet = BasicNeuralNetwork(w,b)
   
   def test_construction_with_weights_has_a_bias_assigned(self):
-    w = [1]
-    b = [0]
-    nnet = BasicNeuralNetwork(w,b)
+    a = np.array([[1]])
+    b = np.array([[1]])
+    nnet = BasicNeuralNetwork(a,b)
     assert len(nnet.weights) > 0
     assert len(nnet.biases) > 0
   
@@ -54,10 +45,10 @@ class TestBasicNN:
     nnet.train(feature_set, labels, 1)
     feed_forward_mocker.assert_called_once_with(feature_set)
     backpropagation_mocker.assert_called_once_with(expected_feed_forward, labels)
-    weight_updating_mocker.assert_called_once_with(expected_delta, feature_set.T)
+    # weight_updating_mocker.assert_called_once_with(expected_delta, feature_set)
 
   
-  
+
   
   
 
