@@ -1,40 +1,42 @@
-from neuroevolution.activation_functions import sigmoid, sigmoid_der
-from neuroevolution.error_functions import MSE
+from neuroevolution.activation_functions import sigmoid, sigmoid_der, relu, relu_der
+from neuroevolution.error_functions import MSE, crossentropy_loss
 import numpy as np
 import typing
 class BasicNeuralNetwork:
   """Class that implements the basic behaviour of a neural network.
   """
 
-  def __init__(self, weights, biases, lr = 0.05 ):
+  def __init__(self, layers:list, num_of_classes:int, input_size:int, lr = 0.05, activation_functs = None):
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
-      weights -- weights for the NNET to be initialized with, you can omit this
-      since you can add the layers of weights later on.
-      biases -- biases corresponding to the layers of weights.
+      layers -- List of numbers that ensemble the number of neurons od each layer
       lr -- Stands for learning rate and it ts the size of the movement once you
       start training it.
     """ 
-    if weights.shape[1] != biases.shape[0]:
-      raise AttributeError("Weight and biases length do not match") 
-         
-    self.weights = weights
-    self.biases = biases
+    self.layers = layers
     self.learning_rate = lr
-
-  def add_layer(self, layer, bias):
-    """Method that allows to add a new layer to the existing ones.
-    You can create an empty neural network and after that build it using this 
-    method.
-    KeyWord Arguments:
-      layer -- the list of weights to be added to the main structure
-      bias -- the bias that correspond to the layer we are adding
-    """  
-    self.weights.append(layer)
-    self.biases.append(bias)
-    if len(self.weights) != len(self.biases):
-      print("Lengths are not coincident")
+    self.params = {}
+    self.loss = []
+    if layers[-1] != num_of_classes:
+      raise AttributeError("The number of classes should match the last layer")
+    if layers[0] != input_size:
+      raise AttributeError("The input size should match the 1st layer")
+    if len(self.layers) == 0:
+      raise AttributeError("Can't create a neural net without a single layer ")
+    self.activation_functs = activation_functs
+    if activation_functs is None:
+      self.activation_functs = [sigmoid for i in range(len(self.layers))]
+    
+    self.__initialize_weithts_and_biases()
+  
+  def __initialize_weithts_and_biases(self):
+    np.random.seed = 42
+    for i,e in enumerate(self.layers):
+      if i < len(self.layers)-1:
+        self.params['W{}'.format(i+1)] = np.random.randn(self.layers[i],
+                                                       self.layers[i+1])
+        self.params['b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
   
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
     """Training method of the neural network.
@@ -45,15 +47,13 @@ class BasicNeuralNetwork:
       epochs -- number of iterations of optimization that the neural network
       will perform
     """  
-    print(self.weights)
     for i in range(epochs):
-      forward_pass = self.feed_forward(inputs)
-      delta = self.backpropagation(forward_pass, targets)
-      features = inputs.T
-      self.weight_updating(delta, features)
-      # if i % 100 == 0:
-      #   print("Epoch {}".format(i))
-    print(self.weights)
+      y_hat = self.feed_forward(inputs)
+      loss = crossentropy_loss(targets,y_hat)
+      self.loss.append(loss)
+      self.backpropagation(inputs,y=targets,y_hat=y_hat)
+      self.weight_updating()
+
 
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
@@ -62,36 +62,53 @@ class BasicNeuralNetwork:
     Returns:
         activated_result -- The result of the dot product and the activation
         function
-    """  
-    forward_pass = np.dot(inputs, self.weights) + self.biases[0]
-    activated_result = sigmoid(forward_pass)
-    return activated_result
+    """ 
+    for i in range(len(self.layers)-1):
+      if i == 0:
+        Z_i = inputs.dot(self.params['W{}'.format(i+1)]) + self.params['b{}'.format(i+1)]
+        A_i = self.activation_functs[i](Z_i)
+      else:
+        Z_i = A_i.dot(self.params['W{}'.format(i+1)]) + self.params['b{}'.format(i+1)]
+        A_i = self.activation_functs[i](Z_i)
+      self.params['Z{}'.format(i+1)] = Z_i 
+      self.params['A{}'.format(i+1)] = A_i 
+    y_hat = A_i
+    return y_hat
   
-  def backpropagation(self, forward_pass, labels):
+  def backpropagation(self, inputs, y, y_hat):
     """The backward pass to update the weights.
     It computes the ammount in which the weights must be changed to match the 
     outputs by the calculation of the error that the neural network is making
     at the moment.
+    Note: It only performs the backpropagation, not the weight updating.
     
     Returns:
         z_delta -- The delta diference in which the weights should be modified
     """  
-    #  We calculate the error made by the nnet
-    error = forward_pass - labels
-    # We use the derivative of the sigmoid to extract the correct data
-    dcost_dpred = error
-    dpred_dz = sigmoid_der(forward_pass)
-    z_delta = dcost_dpred * dpred_dz
-    print(z_delta)
-    return z_delta
+    dl_wrt_yhat = -(np.divide(y, y_hat) - np.divide((1 - y),(1-y_hat)))
+    dl_wrt_sig = y_hat * (1-y_hat)
+    dl_wrt_z_i = dl_wrt_yhat * dl_wrt_sig
+    for i in range(len(self.layers)-1,0,-1):
+      if i != len(self.layers)-1:
+        # TODO: Make this derivative general to all activation functions
+        dl_wrt_z_i = dl_wrt_A_j * sigmoid_der(self.params['Z{}'.format(i)])
+      if i > 1:
+        dl_wrt_A_j = dl_wrt_z_i.dot(self.params['W{}'.format(i)].T)
+        dl_wrt_w_i = self.params['A{}'.format(i-1)].T.dot(dl_wrt_z_i)
+      else:
+        dl_wrt_w_i = inputs.T.dot(dl_wrt_z_i)
+      dl_wrt_b_i = np.sum(dl_wrt_z_i, axis=0)
+      self.params['dl_wrt_w{}'.format(i)] = dl_wrt_w_i
+      self.params['dl_wrt_b{}'.format(i)] = dl_wrt_b_i
 
-  def weight_updating(self, delta, inputs):
-    print(inputs)
-    print(delta)
-    self.weights -= self.learning_rate * np.dot(inputs, delta)
-    for num in delta:
-      self.biases[0] -= self.learning_rate * num
-
+  def weight_updating(self):
+    for i in range(len(self.layers)-1):
+      self.params['W{}'.format(i+1)] = self.params[
+                  'W{}'.format(i+1)] - self.learning_rate * self.params[
+                  'dl_wrt_w{}'.format(i+1)]
+      self.params['b{}'.format(i+1)] = self.params[
+                  'b{}'.format(i+1)] - self.learning_rate * self.params[
+                  'dl_wrt_b{}'.format(i+1)]
     
  
 
