@@ -11,7 +11,8 @@ class BasicNeuralNetwork:
   to calculate the backpropagation step, it may not be super eficient in memory
   """
 
-  def __init__(self, layers:list, num_of_classes:int, input_size:int, lr = 0.05, activation_functs = None):
+  def __init__(self, layers:list, num_of_classes:int, input_size:int, lr = 0.05,
+               activation_functs = None):
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
@@ -36,7 +37,7 @@ class BasicNeuralNetwork:
     self.__initialize_weithts_and_biases()
   
   def __initialize_weithts_and_biases(self):
-    """Function that initialize weights and biases randombly. The random values
+    """Function that initialize weights and biases randomly. The random values
     are not uniformly distributed which can cause a slower convergence.
     """
     np.random.seed = 42
@@ -64,6 +65,7 @@ class BasicNeuralNetwork:
       print(loss)
 
 
+
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
     computes the dot product between the features and the weights and then adds
@@ -74,10 +76,12 @@ class BasicNeuralNetwork:
     """ 
     for i in range(len(self.layers)-1):
       if i == 0:
-        Z_i = inputs.dot(self.params['W{}'.format(i+1)]) + self.params['b{}'.format(i+1)]
+        Z_i = inputs.dot(self.params['W{}'.format(i+1)]) + self.params[
+                                     'b{}'.format(i+1)]
         A_i = self.activation_functs[i](Z_i)
       else:
-        Z_i = A_i.dot(self.params['W{}'.format(i+1)]) + self.params['b{}'.format(i+1)]
+        Z_i = A_i.dot(self.params['W{}'.format(i+1)]) + self.params[
+                                  'b{}'.format(i+1)]
         A_i = self.activation_functs[i](Z_i)
       self.params['Z{}'.format(i+1)] = Z_i 
       self.params['A{}'.format(i+1)] = A_i 
