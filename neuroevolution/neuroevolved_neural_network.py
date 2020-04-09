@@ -6,6 +6,7 @@ import neuroevolution.operators.mutation_operators as mutations
 import numpy as np
 import inspect
 import random
+import copy
 
 # Genetic operator probabilities in percentage
 SELECTION_PROBABILITY = 10
@@ -40,7 +41,6 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
         conventions
     """
     self.layers = layers
-    self.learning_rate = lr
     self.params = {}
     self.loss = []
     self.population = {}
@@ -75,16 +75,16 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
                           'b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
 
   def evolved_feed_forward(self, inputs: np.array):
-  """Calculation of the forward pass of the neural network with the clear 
-  distinction that it needs to be calculated for each of the population 
-  genotypes
-  
-  Arguments:
-      inputs {np.array} -- The input NP Array that ensembles the dataset
-  
-  Returns:
-      population_activated_results -- The activated results calculation
-  """
+    """Calculation of the forward pass of the neural network with the clear 
+    distinction that it needs to be calculated for each of the population 
+    genotypes
+    
+    Arguments:
+        inputs {np.array} -- The input NP Array that ensembles the dataset
+    
+    Returns:
+        population_activated_results -- The activated results calculation
+    """
     population_activated_results = {}
     for (k,v) in self.population.items():
       y_hat = self.calculate_feed_forward(inputs, self.population[k])
@@ -105,13 +105,7 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
       for k,v in activated_results.items():
         loss = crossentropy_loss(targets,v)
         self.population[k]['loss']=loss
-      # Sorting the population by loss
-      sorted_pop = sorted(
-          self.population.items(), key=lambda x: x[1]['loss'], reverse=False)
-      npop = {}
-      for (k,v) in sorted_pop:
-        npop[k] = v
-      self.population = npop
+      
       # Selection operator
       if len(self.population.keys()) > self.max_pop_size or np.random.randint(0,101) < SELECTION_PROBABILITY:
         self.selection_operator()
@@ -119,25 +113,31 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
       for (k,v) in self.population.items():
         for i in range(len(self.layers)-1):
           if np.random.randint(0,100) < MUTATION_PROBABILITY:
-            v_copy = v.copy()
+            v_copy = copy.deepcopy(v)
             elem = v_copy['W{}'.format(i+1)]
             elem = self.mutation_operator(elem)
             v_copy['W{}'.format(i+1)] = elem
-            if v != v_copy:
-              self.new_individual(v_copy)
+            self.new_individual(v_copy)
           if np.random.randint(0,100) < MUTATION_PROBABILITY:
-            v_copy = v.copy()
+            v_copy = copy.deepcopy(v)
             elem = v_copy['b{}'.format(i+1)]
             elem = self.mutation_operator(elem)
             v_copy['b{}'.format(i+1)] = elem
-            if v != v_copy:
-              self.new_individual(v_copy)
+            self.new_individual(v_copy)
       # Crossover operator
-      self.crossover_populations('W')
-      self.crossover_populations('b')
+      # self.crossover_populations('W')
+      # self.crossover_populations('b')
       self.population.update(self.additions)
       self.additions = {}
+      self.sort_population()
 
+  def sort_population(self):
+    sorted_pop = sorted(
+          self.population.items(), key=lambda x: x[1]['loss'], reverse=False)
+    npop = {}
+    for (k,v) in sorted_pop:
+      npop[k] = v
+    self.population = npop
 
   def new_individual(self, individual:dict):
     """Function that will add a new individual to the population
@@ -159,8 +159,8 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
     [p1,p2] = random.sample(self.population.keys(),k=2)
     for i in range(len(self.layers)-1):
       if np.random.randint(0,100) < CROSSOVER_PROBABILITY:
-        p1_copy = self.population[p1].copy()
-        p2_copy = self.population[p2].copy()
+        p1_copy = copy.deepcopy(self.population[p1])
+        p2_copy = copy.deepcopy(self.population[p2])
         w_1 = self.population[p1]['{}{}'.format(key,i+1)]
         w_2 = self.population[p2]['{}{}'.format(key,i+1)]
         new_elements = single_point_crossover(w_1, w_2)
@@ -202,5 +202,4 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
     # operation itself
     operation = operation[1]
     res = operation(elem)
-    print(res)
     return res
