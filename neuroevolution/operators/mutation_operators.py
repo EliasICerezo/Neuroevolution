@@ -17,7 +17,7 @@ def generate_rand_value(weights,low = -2, high = 2):
       the random number generated with the bounds above
   """
   index = []
-  for i in len(weights.shape):
+  for i in range(len(weights.shape)):
     index.append(np.random.randint(0,weights.shape[i] ))
   index =  tuple(index)
   random_value = np.random.uniform(low=low,high=high)
@@ -75,7 +75,7 @@ def change_sign_of_a_weight(weights:np.array):
   Arguments:
       weights {np.array} -- weight array
   """
-  index, random_value = generate_rand_value(weights)
+  index, _ = generate_rand_value(weights)
   weights.put(index, -weights[index])
   return weights
   
