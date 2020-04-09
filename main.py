@@ -16,6 +16,5 @@ if __name__ == "__main__":
     vs = nnet.population.values()
     vs = list(vs)
     for i in vs: print(i['loss'])
-    print(list(nnet.population.keys()).sort())
     # print(nnet.population)
     # print(nnet.params)
