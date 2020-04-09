@@ -74,20 +74,23 @@ class BasicNeuralNetwork:
         activated_result -- The result of the dot product and the activation
         function
     """ 
+    return self.calculate_feed_forward(inputs,self.params)
+  
+  def calculate_feed_forward(self,inputs, store):
     for i in range(len(self.layers)-1):
-      if i == 0:
-        Z_i = inputs.dot(self.params['W{}'.format(i+1)]) + self.params[
-                                     'b{}'.format(i+1)]
-        A_i = self.activation_functs[i](Z_i)
-      else:
-        Z_i = A_i.dot(self.params['W{}'.format(i+1)]) + self.params[
-                                  'b{}'.format(i+1)]
-        A_i = self.activation_functs[i](Z_i)
-      self.params['Z{}'.format(i+1)] = Z_i 
-      self.params['A{}'.format(i+1)] = A_i 
+        if i == 0:
+          Z_i = inputs.dot(store['W{}'.format(i+1)]) + store[
+                                      'b{}'.format(i+1)]
+          A_i = self.activation_functs[i](Z_i)
+        else:
+          Z_i = A_i.dot(store['W{}'.format(i+1)]) + store[
+                                    'b{}'.format(i+1)]
+          A_i = self.activation_functs[i](Z_i)
+        store['Z{}'.format(i+1)] = Z_i 
+        store['A{}'.format(i+1)] = A_i  
     y_hat = A_i
     return y_hat
-  
+
   def backpropagation(self, inputs, y, y_hat):
     """The backward pass to update the weights.
     It computes the ammount in which the weights must be changed to match the 
