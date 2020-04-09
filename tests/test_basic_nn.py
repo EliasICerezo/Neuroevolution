@@ -11,11 +11,11 @@ class TestBasicNN:
   
   def test_construction_without_matching_input_size_and_nnet_structure(self):
     with pytest.raises(AttributeError):
-      nnet = BasicNeuralNetwork([3,1],1,5)
+      _ = BasicNeuralNetwork([3,1],1,5)
   
   def test_construction_with_not_matching_output_and_num_classes_raises_exception(self):
     with pytest.raises(AttributeError):
-      nnet = BasicNeuralNetwork([3,1],2,3)
+      _ = BasicNeuralNetwork([3,1],2,3)
   
   def test_basic_nn_reduces_loss_after_training(self):
     nnet = BasicNeuralNetwork([3,1], 1, 3)
