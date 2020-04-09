@@ -125,8 +125,8 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
             v_copy['b{}'.format(i+1)] = elem
             self.new_individual(v_copy)
       # Crossover operator
-      # self.crossover_populations('W')
-      # self.crossover_populations('b')
+      self.crossover_populations('W')
+      self.crossover_populations('b')
       self.population.update(self.additions)
       self.additions = {}
       self.sort_population()
@@ -166,7 +166,6 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
         new_elements = single_point_crossover(w_1, w_2)
         p1_copy['{}{}'.format(key,i+1)] = new_elements[0]
         p2_copy['{}{}'.format(key,i+1)] = new_elements[1]
-        print("CALLED CROSSOVER")
         self.new_individual(p1_copy)
         self.new_individual(p2_copy)
 
