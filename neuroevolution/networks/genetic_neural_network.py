@@ -1,4 +1,4 @@
-from neuroevolution.basic_neural_network import BasicNeuralNetwork
+from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.error_functions import crossentropy_loss
 from neuroevolution.operators.cross_over_operators import single_point_crossover 
@@ -14,7 +14,7 @@ MUTATION_PROBABILITY = 20
 CROSSOVER_PROBABILITY = 5
 
 
-class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
+class GeneticNeuralNetwork(BasicNeuralNetwork):
   """This class ensembles the behaviour of a neuroevolved neural network.
   It is evolved via a genetic algorithm
   """
@@ -41,8 +41,6 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
         conventions
     """
     self.layers = layers
-    self.params = {}
-    self.loss = []
     self.population = {}
     self.pop_size = pop_size
     self.max_pop_size = max_pop_size
@@ -58,7 +56,7 @@ class NeuroEvolvedNeuralNetwork(BasicNeuralNetwork):
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
     self.__initialize_weithts_and_biases()
   
-  def __initialize_weithts_and_biases(self):
+  def initialize_weithts_and_biases(self):
     """Function that initializes the actual weights and biases of the neural net
     using the previous attributes.
     """
