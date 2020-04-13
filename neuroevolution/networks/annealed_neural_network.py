@@ -8,8 +8,23 @@ MUTATION_PROBABILITY = 50
 WEIGHTED_MUTATION = 0.1
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
-  def __init__(self, layers, num_of_classes, input_size, temperature = 100,
-               decay = 0.1, activation_functs = None): 
+  def __init__(self, layers: list, num_of_classes: int, input_size: int,
+               temperature = 100, decay = 0.1, activation_functs = None):
+    """Constructor of the simulated annealing-optimized neural network.
+    
+    Arguments:
+        layers {list} -- A list of integers indicating the stricture of the 
+        fully connected network to be created
+        num_of_classes {int} -- Number of classes that the dataset contains
+        input_size {int} -- Number of nodes in the input layer
+    
+    Keyword Arguments:
+        temperature {float} -- Base termperature of the system (default: {100})
+        decay {float} -- Decay rate of the temperature during the execution
+        (default: {0.1})
+        activation_functs {list} -- List of the activation functions to be used
+        in the training structure (default: {None})
+    """
     self.layers = layers
     self.decay = decay
     self.params = {}
@@ -27,6 +42,16 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     self.initialize_weithts_and_biases()
   
   def train(self, inputs: np.ndarray, labels: np.ndarray, max_iter: int):
+    """Function that trains (optimizes the weights and biases) of the neural net
+    
+    Arguments:
+        inputs {np.ndarray} -- NumPy array that contains the the features to be
+        used in the prediction.
+        labels {np.ndarray} -- NumPy array containing the true values for the 
+        given inputs.
+        max_iter {int} -- Maximum number of iterations that the algorithm is
+        going to be doing before stopping the execution.
+    """
     activated_results = self.feed_forward(inputs)
     cost = crossentropy_loss(labels, activated_results)
     for i in range(max_iter):
@@ -42,7 +67,6 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
       new_cost = crossentropy_loss(labels, new_activated_results)
       if self.acceptance_probability(
           cost, new_cost, self.temperature) > np.random.random():
-        # breakpoint()
         cost = new_cost
         activated_results = new_activated_results
         self.params.update(new_state)
@@ -50,14 +74,42 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
 
 
   def random_mutation(self, values:np.ndarray):
+    """Function that privides a random mutation in the weights or biases.
+    
+    Arguments:
+        values {np.ndarray} -- Weights or biases object to be mutated
+    
+    Returns:
+        np.ndarray -- Te weights or biases array mutated
+    """ 
     if np.random.randint(0,100) < MUTATION_PROBABILITY:
       values = add_a_weighted_random_value(values, WEIGHTED_MUTATION)
     return values
   
   def update_temperature(self, fraction):
+    """The function that updated the temperature each iteration of the loop
+    
+    Arguments:
+        fraction {float} -- The fraction that the temperature is going to be 
+        reduced
+    """
     self.temperature = self.temperature - (self.temperature*fraction)
 
   def acceptance_probability(self, cost, new_cost, temperature):
+    """Function that calculates the acceptance probability of the provided 
+    solution.
+    
+    Arguments:
+        cost {float} -- The value of the cost function in the prevoius 
+        iteration
+        new_cost {float} -- The value of the cost function in the current 
+        iteration
+        temperature {float} -- Value of the temperature
+    
+    Returns:
+        v -- A value between 0 and 1 repressenting the probability of being
+        accepted
+    """
     if new_cost < cost:
         return 1
     else:
