@@ -24,4 +24,3 @@ def single_point_crossover(w1: np.array,w2: np.array):
   w2_ensembled = np.concatenate([w2_splitted[0], w1_splitted[1]])
   return (w1_ensembled, w2_ensembled)
 
-

@@ -34,9 +34,9 @@ class BasicNeuralNetwork:
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
     
-    self.__initialize_weithts_and_biases()
+    self.initialize_weithts_and_biases()
   
-  def __initialize_weithts_and_biases(self):
+  def initialize_weithts_and_biases(self):
     """Function that initialize weights and biases randomly. The random values
     are not uniformly distributed which can cause a slower convergence.
     """
@@ -76,7 +76,7 @@ class BasicNeuralNetwork:
     """ 
     return self.calculate_feed_forward(inputs,self.params)
   
-  def calculate_feed_forward(self,inputs, store):
+  def calculate_feed_forward(self, inputs, store):
     for i in range(len(self.layers)-1):
         if i == 0:
           Z_i = inputs.dot(store['W{}'.format(i+1)]) + store[
