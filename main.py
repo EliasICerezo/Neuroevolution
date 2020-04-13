@@ -1,5 +1,6 @@
-from neuroevolution.basic_neural_network import BasicNeuralNetwork
-from neuroevolution.neuroevolved_neural_network import NeuroEvolvedNeuralNetwork
+from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
+from neuroevolution.networks.genetic_neural_network import GeneticNeuralNetwork
+from neuroevolution.networks.annealed_neural_network import AnnealedNeuralNetwork
 import numpy as np
 
 if __name__ == "__main__":
@@ -8,13 +9,14 @@ if __name__ == "__main__":
     labels = labels.reshape(5,1)
     # print(output_layer)
     #Creating the actual nnet
-    nnet = NeuroEvolvedNeuralNetwork(layers=[3,2,1], input_size=3, num_of_classes= 1)
+    nnet = AnnealedNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
     print(nnet.params)
-    print(nnet.population.keys())
-    print(nnet.feed_forward)
+    # print(nnet.population.keys())
+    # print(nnet.feed_forward)
     nnet.train(feature_set,labels, 100)
-    vs = nnet.population.values()
-    vs = list(vs)
-    for i in vs: print(i['loss'])
+    # vs = nnet.population.values()
+    # vs = list(vs)
+    # for i in vs: print(i['loss'])
     # print(nnet.population)
     # print(nnet.params)
+    print(nnet.loss)
