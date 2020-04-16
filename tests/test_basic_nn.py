@@ -1,7 +1,8 @@
-from neuroevolution.basic_neural_network import BasicNeuralNetwork
+from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 import pytest
 import pytest_mock
 import numpy as np
+import copy
 
 class TestBasicNN:
   
@@ -17,6 +18,41 @@ class TestBasicNN:
     with pytest.raises(AttributeError):
       _ = BasicNeuralNetwork([3,1],2,3)
   
+  def test_construction_initializes_weights_and_biases(self):
+    nnet = BasicNeuralNetwork([3,1],1,3)
+    # This network has only one layer comunicating the input with the output, so
+    # it only contains a weight array 'W1' and bias one 'b1'
+    assert nnet.params['W1'] is not None
+    assert nnet.params['b1'] is not None
+  
+  def test_calculate_feed_forward_return_is_valid(self):
+    # In this test we will calculate the forward propagation with the sigmoid
+    # activation function, which should return a value between 0 and 1
+     nnet = BasicNeuralNetwork([3,1],1,3)
+     feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
+     activated_results = nnet.feed_forward(feature_set)
+     assert (activated_results > 0.0).all() 
+     assert (activated_results < 1.0).all()
+  
+  def test_train_with_0_epochs_does_nothing(self):
+    nnet = BasicNeuralNetwork([3,1],1,3)
+    feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
+    labels = np.array([[1,0,0,1,1]])
+    params_copy = copy.deepcopy(nnet.params) 
+    nnet.train(feature_set,labels, 0)
+    assert str(nnet.params) == str(params_copy)
+  
+  def test_backpropgation_creates_all_the_derivatives_required(self):
+    nnet = BasicNeuralNetwork([3,1],1,3)
+    feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
+    labels = np.array([[1,0,0,1,1]])
+    # We need to use a vector the shape of the transposed matrix of the labels
+    nnet.backpropagation(feature_set, labels, np.random.randn(5,1))
+    assert 'dl_wrt_w1' in nnet.params.keys()
+    assert 'dl_wrt_b1' in nnet.params.keys()
+
+  
+
   def test_basic_nn_reduces_loss_after_training(self):
     nnet = BasicNeuralNetwork([3,1], 1, 3)
     feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
@@ -43,32 +79,15 @@ class TestBasicNN:
     num_epochs = 100
     nnet.train(feature_set,labels,num_epochs)
     assert len(nnet.loss) == num_epochs
-
   
-
-  # def test_train(self, mocker: pytest_mock.mocker):
-  #   expected_feed_forward = np.ndarray((3,5))
-  #   expected_delta = np.ndarray((1,5))
-  #   feed_forward_mocker = mocker.patch(
-  #       'neuroevolution.basic_neural_network.BasicNeuralNetwork.feed_forward',
-  #       return_value=expected_feed_forward)
-  #   backpropagation_mocker = mocker.patch(
-  #       'neuroevolution.basic_neural_network.BasicNeuralNetwork.backpropagation',
-  #       return_value=expected_feed_forward)
-  #   weight_updating_mocker = mocker.patch(
-  #       'neuroevolution.basic_neural_network.BasicNeuralNetwork.weight_updating')
-  #   feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
-  #   labels = np.array([[1,0,0,1,1]])
-  #   labels = labels.reshape(5,1)
-  #   weights = np.random.rand(3,1)
-  #   bias = np.random.rand(1)
-  #   nnet = BasicNeuralNetwork([3,1], 1, 3)
-  #   nnet.train(feature_set, labels, 10)
-  #   feed_forward_mocker.assert_called_once_with(feature_set)
-  #   backpropagation_mocker.assert_called_once_with(expected_feed_forward, labels)
-    # weight_updating_mocker.assert_called_once_with(expected_delta, feature_set)
-
-  
+  def test_feed_forward_with_more_than_two_layers(self):
+    #  In this test we will calculate the forward propagation with the sigmoid
+    # activation function, which should return a value between 0 and 1
+     nnet = BasicNeuralNetwork([3,2,1],1,3)
+     feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
+     activated_results = nnet.feed_forward(feature_set)
+     assert (activated_results > 0.0).all() 
+     assert (activated_results < 1.0).all()    
 
   
   
