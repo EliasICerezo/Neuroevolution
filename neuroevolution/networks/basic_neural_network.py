@@ -62,8 +62,6 @@ class BasicNeuralNetwork:
       self.loss.append(loss)
       self.backpropagation(inputs,y=targets,y_hat=y_hat)
       self.__weight_updating()
-      print(loss)
-
 
 
   def feed_forward(self, inputs):

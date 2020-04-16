@@ -11,7 +11,7 @@ import copy
 # Genetic operator probabilities in percentage
 SELECTION_PROBABILITY = 10
 MUTATION_PROBABILITY = 20
-CROSSOVER_PROBABILITY = 5
+CROSSOVER_PROBABILITY = 15
 
 
 class GeneticNeuralNetwork(BasicNeuralNetwork):
@@ -45,16 +45,26 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     self.pop_size = pop_size
     self.max_pop_size = max_pop_size
     self.additions = {}
+
+    if pop_size == 0:
+      raise AttributeError(
+        "Can't create a genetic neural net without a single individual")
+    if max_pop_size == 0:
+      raise AttributeError(
+        "Can't create a genetic neural net without a 0 maximum individuals")
+    if len(self.layers) == 0:
+      raise AttributeError("Can't create a neural net without a single layer ")
     if layers[-1] != num_of_classes:
       raise AttributeError("The number of classes should match the last layer")
     if layers[0] != input_size:
       raise AttributeError("The input size should match the 1st layer")
-    if len(self.layers) == 0:
-      raise AttributeError("Can't create a neural net without a single layer ")
+    if pop_size > max_pop_size:
+      raise AttributeError(
+        "The size of the population can't be greater than its maximum")
     self.activation_functs = activation_functs
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
-    self.__initialize_weithts_and_biases()
+    self.initialize_weithts_and_biases()
   
   def initialize_weithts_and_biases(self):
     """Function that initializes the actual weights and biases of the neural net
@@ -108,28 +118,31 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       if len(self.population.keys()) > self.max_pop_size or np.random.randint(0,101) < SELECTION_PROBABILITY:
         self.selection_operator()
       # Mutation operator (it mutates weights and biases)
-      for (k,v) in self.population.items():
-        for i in range(len(self.layers)-1):
-          if np.random.randint(0,100) < MUTATION_PROBABILITY:
-            v_copy = copy.deepcopy(v)
-            elem = v_copy['W{}'.format(i+1)]
-            elem = self.mutation_operator(elem)
-            v_copy['W{}'.format(i+1)] = elem
-            self.new_individual(v_copy)
-          if np.random.randint(0,100) < MUTATION_PROBABILITY:
-            v_copy = copy.deepcopy(v)
-            elem = v_copy['b{}'.format(i+1)]
-            elem = self.mutation_operator(elem)
-            v_copy['b{}'.format(i+1)] = elem
-            self.new_individual(v_copy)
+      self.mutate_population()
       # Crossover operator
       self.crossover_populations('W')
       self.crossover_populations('b')
       self.population.update(self.additions)
       self.additions = {}
-      self.sort_population()
+      self.__sort_population()
 
-  def sort_population(self):
+  def mutate_population(self):
+    for (k,v) in self.population.items():
+      for i in range(len(self.layers)-1):
+        if np.random.randint(0,100) < MUTATION_PROBABILITY:
+          v_copy = copy.deepcopy(v)
+          elem = v_copy['W{}'.format(i+1)]
+          elem = self.__mutation_operator(elem)
+          v_copy['W{}'.format(i+1)] = elem
+          self.__new_individual(v_copy)
+        if np.random.randint(0,100) < MUTATION_PROBABILITY:
+          v_copy = copy.deepcopy(v)
+          elem = v_copy['b{}'.format(i+1)]
+          elem = self.__mutation_operator(elem)
+          v_copy['b{}'.format(i+1)] = elem
+          self.__new_individual(v_copy)
+
+  def __sort_population(self):
     sorted_pop = sorted(
           self.population.items(), key=lambda x: x[1]['loss'], reverse=False)
     npop = {}
@@ -137,7 +150,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       npop[k] = v
     self.population = npop
 
-  def new_individual(self, individual:dict):
+  def __new_individual(self, individual:dict):
     """Function that will add a new individual to the population
     
     Arguments:
@@ -164,8 +177,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         new_elements = single_point_crossover(w_1, w_2)
         p1_copy['{}{}'.format(key,i+1)] = new_elements[0]
         p2_copy['{}{}'.format(key,i+1)] = new_elements[1]
-        self.new_individual(p1_copy)
-        self.new_individual(p2_copy)
+        self.__new_individual(p1_copy)
+        self.__new_individual(p2_copy)
 
   def selection_operator(self):
     """Operator that represent the natural selection where they will only survive
@@ -180,7 +193,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         })
     self.population = reduce__dict(self.population)
   
-  def mutation_operator(self, elem:np.array):
+  def __mutation_operator(self, elem:np.array):
     """A function that applies the mutation operator to the given element wether
     it be a bias or a weight
     
