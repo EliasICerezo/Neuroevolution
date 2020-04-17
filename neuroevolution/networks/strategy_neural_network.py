@@ -37,14 +37,17 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     self.layers = layers
     self.population = {}
     self.additions = {}
+    if len(self.layers) == 0:
+      raise AttributeError("Can't create a neural net without a single layer ")
+    if pop_size == 0:
+      raise AttributeError(
+        "Can't create a genetic neural net without a single individual")
     if self.learning_rate <= 0:
       raise AttributeError("The learning rate parameter can't be 0 or lower")
     if layers[-1] != num_of_classes:
       raise AttributeError("The number of classes should match the last layer")
     if layers[0] != input_size:
       raise AttributeError("The input size should match the 1st layer")
-    if len(self.layers) == 0:
-      raise AttributeError("Can't create a neural net without a single layer ")
     self.activation_functs = activation_functs
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
