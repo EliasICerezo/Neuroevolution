@@ -39,7 +39,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     self.activation_functs = activation_functs
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
-    self.initialize_weithts_and_biases()
+    self.initialize_weithts_and_biases(self.params)
   
   def train(self, inputs: np.ndarray, labels: np.ndarray, max_iter: int):
     """Function that trains (optimizes the weights and biases) of the neural net
