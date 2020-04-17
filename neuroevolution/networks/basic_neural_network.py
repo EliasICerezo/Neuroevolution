@@ -34,19 +34,27 @@ class BasicNeuralNetwork:
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
     
-    self.initialize_weithts_and_biases()
+    self.initialize_weithts_and_biases(self.params)
   
-  def initialize_weithts_and_biases(self):
+  def initialize_weithts_and_biases(self, store:dict):
     """Function that initialize weights and biases randomly. The random values
     are not uniformly distributed which can cause a slower convergence.
+    
+    Keyword Arguments:
+        store {dict} -- Dictionary to put the initialization if provided (default: {None})
+    
+    Returns:
+        [type] -- [description]
     """
     np.random.seed = 42
+    initialization = {}
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:
-        self.params['W{}'.format(i+1)] = np.random.randn(self.layers[i],
+        initialization['W{}'.format(i+1)] = np.random.randn(self.layers[i],
                                                        self.layers[i+1])
-        self.params['b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
-  
+        initialization['b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
+    store.update(initialization)
+
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
     """Training method of the neural network.
     It optimized the weights for a given input
