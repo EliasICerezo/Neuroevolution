@@ -124,12 +124,27 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.additions = {}
       self.sort_population()
 
-  def calculate_loss(self, activated_results, targets):
+  def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
+    """This function calculates the loss for the population of the network
+    
+    Arguments:
+        activated_results {numpy.ndarray} -- Array resulting of the forward pass
+        targets {np.ndarray} -- Array of true values passed during the training 
+        process
+    """
     for k,v in activated_results.items():
       loss = crossentropy_loss(targets,v)
       self.population[k]['loss']=loss
 
   def mutate_population(self, sigma: float = None):
+    """Function that performs a random mutarion in the population, the mutated 
+    structures can be either the weights, the biases, or both. It obeys to a 
+    mutation probability that is constant during the training process
+    
+    Keyword Arguments:
+        sigma {float} -- If present, applies certain mutation ponderated rather
+        than a random mutaion operattion (default: {None})
+    """
     for (k,v) in self.population.items():
       for i in range(len(self.layers)-1):
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
@@ -146,6 +161,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
           self.__new_individual(v_copy)
 
   def sort_population(self):
+    """Function that sorts the population over loss values ascending
+    """
     sorted_pop = sorted(
           self.population.items(), key=lambda x: x[1]['loss'], reverse=False)
     npop = {}

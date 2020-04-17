@@ -4,8 +4,32 @@ import numpy as np
 
 
 class StrategyNeuralNetwork(GeneticNeuralNetwork):
+  """Module that ensembles an evolutionary-strategy based neural network.
+  It inherits from genetic neural network since behaviour is similar in a lot of
+  ways.
+  """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
                activation_functs = None, pop_size = 50, sigma = 0.1, lr = 0.001):
+    """Constructor of the evolutionary strategy based beural network
+    
+    Arguments:
+        layers {list} -- Structure of the network encoded as a list with the 
+        number of nodes in each layer. Note: The network built is a fully 
+        connected one
+        num_of_classes {int} -- The number of classes that is going to 
+        distinguish the network.
+        input_size {int} -- The number of nodes in the input layer
+    
+    Keyword Arguments:
+        activation_functs {[type]} -- A list of the activation functions used
+        in each layer in the forward pass (default: {None})
+        pop_size {int} -- the size of the population to be created in order
+        to optimize the network (default: {50})
+        sigma {float} -- A limitant factor on how much jitter will affect
+        the weights (default: {0.1})
+        lr {float} -- Learning rate. It determines how fast will the
+        algorithm converge (default: {0.001})
+    """        
     self.learning_rate = lr
     self.sigma = sigma
     self.pop_size = pop_size
@@ -27,6 +51,15 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     self.initialize_weithts_and_biases()
   
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
+    """Training loop, it mutates the weights, biases, selects and orders the
+    population in order to reduce the objective function, in this case
+    crossentropy
+    
+    Arguments:
+        inputs {np.ndarray} -- Input array with the features
+        targets {np.ndarray} -- Target array, or labels
+        epochs {int} -- Number of iterations
+    """
     for i in range(epochs):
       self.mutate_population(sigma=self.sigma)
       # Normalize the mutations
@@ -39,6 +72,8 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
       self.selection_operator(1)
 
   def normalize_mutations(self):
+    """Function that normalizes the mutations done to the current population
+    """
     for (k,v) in self.additions.items():
       for i in range(len(self.layers)-1):
         if (v['W{}'.format(i+1)]).shape != (1,1):
