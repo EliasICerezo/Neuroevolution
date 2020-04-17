@@ -110,9 +110,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     """
     for i in range(max_iter):
       activated_results = self.evolved_feed_forward(inputs)
-      for k,v in activated_results.items():
-        loss = crossentropy_loss(targets,v)
-        self.population[k]['loss']=loss
+      self.calculate_loss(activated_results, targets)
       
       # Selection operator
       if len(self.population.keys()) > self.max_pop_size or np.random.randint(0,101) < SELECTION_PROBABILITY:
@@ -124,25 +122,30 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.crossover_populations('b')
       self.population.update(self.additions)
       self.additions = {}
-      self.__sort_population()
+      self.sort_population()
 
-  def mutate_population(self):
+  def calculate_loss(self, activated_results, targets):
+    for k,v in activated_results.items():
+      loss = crossentropy_loss(targets,v)
+      self.population[k]['loss']=loss
+
+  def mutate_population(self, sigma: float = None):
     for (k,v) in self.population.items():
       for i in range(len(self.layers)-1):
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
           elem = v_copy['W{}'.format(i+1)]
-          elem = self.__mutation_operator(elem)
+          elem = self.__mutation_operator(elem,sigma)
           v_copy['W{}'.format(i+1)] = elem
           self.__new_individual(v_copy)
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
           elem = v_copy['b{}'.format(i+1)]
-          elem = self.__mutation_operator(elem)
+          elem = self.__mutation_operator(elem,sigma)
           v_copy['b{}'.format(i+1)] = elem
           self.__new_individual(v_copy)
 
-  def __sort_population(self):
+  def sort_population(self):
     sorted_pop = sorted(
           self.population.items(), key=lambda x: x[1]['loss'], reverse=False)
     npop = {}
@@ -180,7 +183,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         self.__new_individual(p1_copy)
         self.__new_individual(p2_copy)
 
-  def selection_operator(self):
+  def selection_operator(self, division:float = 5):
     """Operator that represent the natural selection where they will only survive
     the 20% of the offspring with the best fitness, that is the minimum loss.
     """
@@ -189,27 +192,31 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     reduce__dict = (
         lambda x: {
             k:v for index,(k,v) in enumerate(x.items())
-            if index<=self.max_pop_size//5
+            if index<=self.max_pop_size//division
         })
     self.population = reduce__dict(self.population)
   
-  def __mutation_operator(self, elem:np.array):
+  def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether
     it be a bias or a weight
     
     Arguments:
         elem {np.array} -- The element to be mutated
+        sigma {float} -- (optional) Value used to ponderate the mutation
     
     Returns:
         elem -- The mutated element
     """
-    m_operators = inspect.getmembers(mutations, inspect.isfunction)
-    operation = random.choice(m_operators)
-    while operation[0] == 'generate_rand_value':
+    if sigma is None:
       m_operators = inspect.getmembers(mutations, inspect.isfunction)
       operation = random.choice(m_operators)
-    # At this moment, operation is a tuple where the second elem is the 
-    # operation itself
-    operation = operation[1]
-    res = operation(elem)
+      while operation[0] == 'generate_rand_value':
+        m_operators = inspect.getmembers(mutations, inspect.isfunction)
+        operation = random.choice(m_operators)
+      # At this moment, operation is a tuple where the second elem is the 
+      # operation itself
+      operation = operation[1]
+      res = operation(elem)
+    else:
+      res = mutations.add_a_weighted_random_value(elem,sigma)
     return res
