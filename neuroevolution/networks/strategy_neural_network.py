@@ -69,6 +69,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
       self.normalize_mutations()
       # Make the selection
       self.population.update(self.additions)
+      self.additions = {}
       activated_results = self.evolved_feed_forward(inputs)
       self.calculate_loss(activated_results,targets)
       self.sort_population()
