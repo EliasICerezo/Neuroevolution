@@ -16,10 +16,5 @@ class RandomSearchNeuralNetwork(BasicNeuralNetwork):
       if new_individual['loss'] < best_individual['loss']:
         best_individual = new_individual
         self.loss.append(new_individual['loss'])
-
-
-  def generate_random_individual(self):
-    individual = {}
-    self.initialize_weithts_and_biases(individual)
-    return individual
+    self.params = best_individual
     
