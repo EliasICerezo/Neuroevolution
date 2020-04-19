@@ -31,7 +31,8 @@ if __name__ == "__main__":
     nnet.train(feature_set,labels,epochs)
     annealed_loss.append(nnet.loss[-1])
     # Random Neural Network Execution
-    nnet = RandomSearchNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
+    nnet = RandomSearchNeuralNetwork(
+        layers=[3,1], input_size=3, num_of_classes= 1)
     nnet.train(feature_set,labels,epochs)
     random_loss.append(nnet.loss[-1])
 

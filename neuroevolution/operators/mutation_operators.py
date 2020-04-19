@@ -23,6 +23,10 @@ def generate_rand_value(weights,low = -2, high = 2):
   random_value = np.random.uniform(low=low,high=high)
   return index,random_value
 
+
+# Avoid to use prepositions in method and class names. Please, you might
+# consider to refactorize it from `randomize_a_weight` to `randomize_weight`
+# Same for the rest of the method in the code.
 def randomize_a_weight(weights:np.array):
   """Mutates the weights changing one of them for a random value between a scale
   

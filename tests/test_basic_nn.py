@@ -12,11 +12,13 @@ class TestBasicNN:
   
   def test_construction_without_matching_input_size_and_nnet_structure(self):
     with pytest.raises(AttributeError):
-      _ = BasicNeuralNetwork([3,1],1,5)
+      # If you're expecting to get an exception, you don't have to save
+      # object reference.
+      BasicNeuralNetwork([3,1],1,5)
   
   def test_construction_with_not_matching_output_and_num_classes_raises_exception(self):
     with pytest.raises(AttributeError):
-      _ = BasicNeuralNetwork([3,1],2,3)
+      BasicNeuralNetwork([3,1],2,3)
   
   def test_construction_initializes_weights_and_biases(self):
     nnet = BasicNeuralNetwork([3,1],1,3)
@@ -88,11 +90,3 @@ class TestBasicNN:
      activated_results = nnet.feed_forward(feature_set)
      assert (activated_results > 0.0).all() 
      assert (activated_results < 1.0).all()    
-
-  
-  
-
-  
-
-
-  

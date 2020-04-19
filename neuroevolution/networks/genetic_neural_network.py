@@ -8,6 +8,7 @@ import inspect
 import random
 import copy
 
+
 # Genetic operator probabilities in percentage
 SELECTION_PROBABILITY = 10
 MUTATION_PROBABILITY = 20
@@ -74,13 +75,12 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     for pop_index in range(self.pop_size):
       population_encoded_string = "P{}".format(pop_index)
       self.population[population_encoded_string] = {}
-      for i, e in enumerate(self.layers):
+      for i in self.layers:
         if i < len(self.layers)-1:
-          self.population[population_encoded_string][
-                          'W{}'.format(i+1)] = np.random.randn(self.layers[i],
-                          self.layers[i+1])
-          self.population[population_encoded_string][
-                          'b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
+          self.population[population_encoded_string]['W{}'.format(i+1)] = (
+              np.random.randn(self.layers[i], self.layers[i+1]))
+          self.population[population_encoded_string]['b{}'.format(i+1)] = (
+              np.random.randn(self.layers[i+1]))
 
   def evolved_feed_forward(self, inputs: np.array):
     """Calculation of the forward pass of the neural network with the clear 
@@ -94,7 +94,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         population_activated_results -- The activated results calculation
     """
     population_activated_results = {}
-    for (k,v) in self.population.items():
+    for k in self.population.keys():
       y_hat = self.calculate_feed_forward(inputs, self.population[k])
       population_activated_results[k] = y_hat
     return population_activated_results
@@ -108,13 +108,18 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         max_iter {int} -- Maximum number of iterations that the nnet will be 
         running.
     """
-    for i in range(max_iter):
+    for _ in range(max_iter):
       activated_results = self.evolved_feed_forward(inputs)
       self.calculate_loss(activated_results, targets)
-      
+
       # Selection operator
-      if len(self.population.keys()) > self.max_pop_size or np.random.randint(0,101) < SELECTION_PROBABILITY:
+      if (
+          len(self.population.keys()) >
+          self.max_pop_size or np.random.randint(0,101) <
+          SELECTION_PROBABILITY
+      ):
         self.selection_operator()
+
       # Mutation operator (it mutates weights and biases)
       self.mutate_population()
       # Crossover operator
@@ -145,7 +150,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         sigma {float} -- If present, applies certain mutation ponderated rather
         than a random mutaion operattion (default: {None})
     """
-    for (k,v) in self.population.items():
+    for v in self.population.values():
       for i in range(len(self.layers)-1):
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
@@ -187,8 +192,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         key {string} -- The key to crossover, rather it can be W for weights or
         b for biases.
     """
-    [p1,p2] = random.sample(self.population.keys(),k=2)
-    for i in range(len(self.layers)-1):
+    [p1,p2] = random.sample(self.population.keys(), k=2)
+    for i in range(len(self.layers) - 1):
       if np.random.randint(0,100) < CROSSOVER_PROBABILITY:
         p1_copy = copy.deepcopy(self.population[p1])
         p2_copy = copy.deepcopy(self.population[p2])
@@ -211,6 +216,9 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
             k:v for index,(k,v) in enumerate(x.items())
             if index<=self.max_pop_size//division
         })
+    # That's a fucking burrada compitrueno, extract the lambda function from
+    # this method because you are creating an static object over and over, it
+    # can produces memory leaks!
     self.population = reduce__dict(self.population)
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):

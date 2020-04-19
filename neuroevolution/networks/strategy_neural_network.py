@@ -1,6 +1,7 @@
 from neuroevolution.networks.genetic_neural_network import GeneticNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 import numpy as np
+import typing
 
 
 class StrategyNeuralNetwork(GeneticNeuralNetwork):
@@ -8,8 +9,16 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
   It inherits from genetic neural network since behaviour is similar in a lot of
   ways.
   """
-  def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 50, sigma = 0.1, lr = 0.001):
+
+  # I recommended you to use `decimal.Decimal` which is a class that wraps a
+  # float and avoid all of his problems. Please try to make the following
+  # operation in a python console and record your face:
+  # >>> 1.2 - 1.0 # pretends to be shoked.
+  def __init__(
+      self, layers: typing.List, num_of_classes: int,
+      input_size: int, activation_functs = None,
+      pop_size: int = 50, sigma: float = 0.1, lr = 0.001
+  ):
     """Constructor of the evolutionary strategy based beural network
     
     Arguments:
@@ -63,7 +72,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
         targets {np.ndarray} -- Target array, or labels
         epochs {int} -- Number of iterations
     """
-    for i in range(epochs):
+    for _ in range(epochs):
       self.mutate_population(sigma=self.sigma)
       # Normalize the mutations
       self.normalize_mutations()
@@ -78,7 +87,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
   def normalize_mutations(self):
     """Function that normalizes the mutations done to the current population
     """
-    for (k,v) in self.additions.items():
+    for v in self.additions.values():
       for i in range(len(self.layers)-1):
         if (v['W{}'.format(i+1)]).shape != (1,1):
           v['W{}'.format(i+1)] = (v['W{}'.format(i+1)] - np.mean(v[

@@ -1,5 +1,11 @@
 import numpy as np
 
+
+# Operators folder does not have an __init__.py. Moreover if the folder is
+# called operators, yo do not need to include `operators` in the file names.
+# Remember, explicit is better than implicit, so please, use descriptive names,
+# and tries to followz Zen of Python.
+
 def single_point_crossover(w1: np.array,w2: np.array):
   """Crossover operator that uses a single point as the divisor for the crossover
   operation. It makes an horizontal split between the 2 arrays provided to the

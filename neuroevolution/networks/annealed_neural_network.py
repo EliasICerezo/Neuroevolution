@@ -1,3 +1,6 @@
+# As I said before, you should import a package instead of a method due to
+# it increases the code legibility thanks to the general vision it give to us.
+
 from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.operators.mutation_operators import add_a_weighted_random_value

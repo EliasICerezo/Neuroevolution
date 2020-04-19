@@ -3,6 +3,10 @@ import pytest
 from pytest_mock import mocker
 import numpy as np 
 
+
+# Same as test_basic_nn, you should consider to split this test in two in order
+# to avoid large method names. 
+
 class TestStrategyNN:
   def test_basic_construction_initializes_at_least_one_member_population(self):
     nnet = StrategyNeuralNetwork([3,1], 1, 3)
