@@ -10,12 +10,13 @@ genetic_loss = []
 annealed_loss = []
 random_loss = []
 epochs = 100
+number_of_experiments = 32
 
 if __name__ == "__main__":
   feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])
   labels = np.array([[1,0,0,1,1]])
   labels = labels.reshape(5,1)
-  for i in range(30):
+  for i in range(number_of_experiments):
     print("Epoch: {}".format(i))
     # Basic Neural Network Execution
     nnet = BasicNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
