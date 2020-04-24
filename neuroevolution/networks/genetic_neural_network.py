@@ -9,9 +9,9 @@ import random
 import copy
 
 # Genetic operator probabilities in percentage
-SELECTION_PROBABILITY = 10
-MUTATION_PROBABILITY = 20
-CROSSOVER_PROBABILITY = 15
+SELECTION_PROBABILITY = 25
+MUTATION_PROBABILITY = 40
+CROSSOVER_PROBABILITY = 20
 
 
 class GeneticNeuralNetwork(BasicNeuralNetwork):
@@ -19,7 +19,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
   It is evolved via a genetic algorithm
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 10, max_pop_size = 100):
+               activation_functs = None, pop_size = 10, max_pop_size = 100, 
+               verbose = True):
     """Constructor of the Genetic Neural Network
     
     Arguments:
@@ -40,6 +41,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         AttributeError: If any of the given arguments does not agree with the 
         conventions
     """
+    self.verbose = verbose
     self.layers = layers
     self.population = {}
     self.pop_size = pop_size
@@ -123,6 +125,9 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.population.update(self.additions)
       self.additions = {}
       self.sort_population()
+      if self.verbose:
+        if i % 50 == 0:
+          print("Epochs: {}".format(i))
 
   def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
     """This function calculates the loss for the population of the network
@@ -209,9 +214,15 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     reduce__dict = (
         lambda x: {
             k:v for index,(k,v) in enumerate(x.items())
-            if index<=self.max_pop_size//division
+            if index<=self.max_pop_size//(division*2)
         })
-    self.population = reduce__dict(self.population)
+    new_pop = {}
+    new_pop = reduce__dict(self.population)
+    for i in range(len(self.population.keys())//(division*2)):
+      index = np.random.randint(0,len(self.population.keys()))
+      key = list(self.population.keys())[index]
+      new_pop[key] = self.population[key]
+    self.population = new_pop
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether
