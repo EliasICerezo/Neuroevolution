@@ -1,6 +1,6 @@
 import numpy as np
 
-def generate_rand_value(weights,low = -2, high = 2):
+def generate_rand_value(weights,low = -10, high = 10):
   """A function that generates a random value and index just for using them in 
   the substitution funcions blow
   
