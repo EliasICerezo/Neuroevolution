@@ -5,7 +5,7 @@ from neuroevolution.error_functions import crossentropy_loss
 import numpy as np
 
 MUTATION_PROBABILITY = 50
-WEIGHTED_MUTATION = 0.1
+
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
   def __init__(self, layers: list, num_of_classes: int, input_size: int,
@@ -83,7 +83,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         np.ndarray -- Te weights or biases array mutated
     """ 
     if np.random.randint(0,100) < MUTATION_PROBABILITY:
-      values = add_a_weighted_random_value(values, WEIGHTED_MUTATION)
+      values = add_a_weighted_random_value(values, np.random.uniform(0.1,4))
     return values
   
   def update_temperature(self, fraction):
@@ -113,6 +113,5 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     if new_cost < cost:
         return 1
     else:
-        # p = np.exp(- (new_cost - cost) / (temperature/ 100))
-        # return p
-        return 0
+        p = np.exp(- (new_cost - cost) / (temperature/ 100))
+        return p

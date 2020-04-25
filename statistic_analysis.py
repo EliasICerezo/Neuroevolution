@@ -17,13 +17,15 @@ if __name__ == "__main__":
   labels = np.array([[1,0,0,1,1]])
   labels = labels.reshape(5,1)
   for i in range(number_of_experiments):
+    # np.random.seed = i
     print("Epoch: {}".format(i))
     # Basic Neural Network Execution
     nnet = BasicNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
     nnet.train(feature_set,labels,epochs)
     basic_loss.append(nnet.loss[-1])
     # Genetic Neural Network Execution
-    nnet = GeneticNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
+    nnet = GeneticNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1,
+        verbose=False)
     nnet.train(feature_set,labels,epochs)
     genetic_loss.append(nnet.population[
           list(nnet.population.keys())[0] ]['loss'])
