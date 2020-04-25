@@ -4,7 +4,7 @@ from neuroevolution.operators.mutation_operators import add_a_weighted_random_va
 from neuroevolution.error_functions import crossentropy_loss
 import numpy as np
 
-MUTATION_PROBABILITY = 50
+MUTATION_PROBABILITY = 40
 
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
@@ -66,7 +66,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
       new_activated_results = self.calculate_feed_forward(inputs,new_state)
       new_cost = crossentropy_loss(labels, new_activated_results)
       if self.acceptance_probability(
-          cost, new_cost, self.temperature) > np.random.random():
+            cost, new_cost, self.temperature) > np.random.random():
         cost = new_cost
         activated_results = new_activated_results
         self.params.update(new_state)
@@ -83,7 +83,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         np.ndarray -- Te weights or biases array mutated
     """ 
     if np.random.randint(0,100) < MUTATION_PROBABILITY:
-      values = add_a_weighted_random_value(values, np.random.uniform(0.1,4))
+      values = add_a_weighted_random_value(values, np.random.uniform(0,1))
     return values
   
   def update_temperature(self, fraction):
@@ -93,7 +93,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         fraction {float} -- The fraction that the temperature is going to be 
         reduced
     """
-    self.temperature = self.temperature - (self.temperature*fraction)
+    self.temperature = self.temperature - 1
 
   def acceptance_probability(self, cost, new_cost, temperature):
     """Function that calculates the acceptance probability of the provided 
@@ -113,5 +113,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     if new_cost < cost:
         return 1
     else:
-        p = np.exp(- (new_cost - cost) / (temperature/ 100))
-        return p
+        # This approach is not good at all and it gets trapped into local minima
+        # p = np.exp(- (new_cost - cost) / (temperature/ 100))
+        # return p
+        return 0
