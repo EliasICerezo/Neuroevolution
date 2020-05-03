@@ -1,7 +1,7 @@
 from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
-from neuroevolution.activation_functions import sigmoid
-from neuroevolution.operators.mutation_operators import add_a_weighted_random_value
-from neuroevolution.error_functions import crossentropy_loss
+import neuroevolution.activation_functions as activation_funtions
+import neuroevolution.operators.mutation as mutation
+import neuroevolution.error_functions as error_functions
 import numpy as np
 
 MUTATION_PROBABILITY = 40
@@ -38,7 +38,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
       raise AttributeError("Can't create a neural net without a single layer ")
     self.activation_functs = activation_functs
     if activation_functs is None:
-      self.activation_functs = [sigmoid for i in range(len(self.layers))]
+      self.activation_functs = [activation_functions.sigmoid for i in range(len(self.layers))]
     self.initialize_weithts_and_biases(self.params)
   
   def train(self, inputs: np.ndarray, labels: np.ndarray, max_iter: int):
@@ -53,7 +53,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         going to be doing before stopping the execution.
     """
     activated_results = self.feed_forward(inputs)
-    cost = crossentropy_loss(labels, activated_results)
+    cost = error_functions.crossentropy_loss(labels, activated_results)
     for i in range(max_iter):
       self.update_temperature(i/float(max_iter))
       # Mutate weights and biases with certain probability
@@ -64,7 +64,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         new_state['b{}'.format(j+1)] = self.random_mutation(
             self.params['b{}'.format(j+1)])
       new_activated_results = self.calculate_feed_forward(inputs,new_state)
-      new_cost = crossentropy_loss(labels, new_activated_results)
+      new_cost = error_functions.crossentropy_loss(labels, new_activated_results)
       if self.acceptance_probability(
             cost, new_cost, self.temperature) > np.random.random():
         cost = new_cost
@@ -83,7 +83,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         np.ndarray -- Te weights or biases array mutated
     """ 
     if np.random.randint(0,100) < MUTATION_PROBABILITY:
-      values = add_a_weighted_random_value(values, np.random.uniform(0,1))
+      values = mutation.add_a_weighted_random_value(values, np.random.uniform(0,1))
     return values
   
   def update_temperature(self, fraction):
