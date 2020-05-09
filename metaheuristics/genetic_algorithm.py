@@ -9,8 +9,20 @@ CROSSOVER_PROBABILITY = 20
 
 
 class GeneticAlgorithm():
+  """Class that ensembles the behavoiur of a classic genetic algorithm and test 
+  wether the algorithm converges to the global minimum. It resolves the ONEMAX 
+  problem
+  """
   def __init__(self, pop_size = 100, length = 500,
     verbose = True):
+    """Constructor of the genetic algorithm
+
+    Keyword Arguments:
+        pop_size {int} -- Size of the population (default: {100})
+        length {int} -- Length of the number string (default: {500})
+        verbose {bool} -- Wether verbose should be prompted while solving
+        (default: {True})
+    """
     self.population = {}
     self.pop_size = pop_size
     self.length = length
@@ -36,10 +48,15 @@ class GeneticAlgorithm():
           2, size=self.length))
 
   def evaluate_individuals(self):
+    """FITNESS FUNCTION FOR THIS PROBLEM.
+    Function that evaluates how good are the individuals.
+    """
     for (k,v) in self.population.items():
       self.population[k]['value'] = sum(v['array'])
 
   def sort_individuals(self):
+    """Function that sortes the individuals from best to worst
+    """
     sorted_pop = sorted(
           self.population.items(), key=lambda x: x[1]['value'], reverse=True)
     npop = {}
@@ -47,10 +64,16 @@ class GeneticAlgorithm():
       npop[k] = v
     self.population = npop
   
-  def solve(self, max_iter):
+  def solve(self, max_iter:int):
+    """Solving function that uses all the genetic operators in order to search
+    the global minimum
+
+    Arguments:
+        max_iter {int} -- maximum number of iterations that the algorithm will
+        run through
+    """
     for i in range(max_iter):
       self.evaluate_individuals()
-      # breakpoint()
       self.sort_individuals()
       self.population = selection_operators.selection(
           self.population,self.pop_size, division=1)
@@ -88,6 +111,14 @@ class GeneticAlgorithm():
     pass
 
 def flip_random_value(arr:list):
+  """Mutation operator for this problem
+
+  Arguments:
+      arr {list} -- String that needs to be mutated
+
+  Returns:
+      list -- Mutated string (in list format)
+  """
   arr_copy = copy.deepcopy(arr)
   idx = np.random.randint(0,len(arr_copy))
   if arr_copy[idx] == 1:
