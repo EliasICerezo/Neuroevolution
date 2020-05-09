@@ -17,22 +17,25 @@ if __name__ == "__main__":
   labels = np.array([[1,0,0,1,1]])
   labels = labels.reshape(5,1)
   for i in range(number_of_experiments):
+    # np.random.seed = i
     print("Epoch: {}".format(i))
     # Basic Neural Network Execution
     nnet = BasicNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
     nnet.train(feature_set,labels,epochs)
     basic_loss.append(nnet.loss[-1])
     # Genetic Neural Network Execution
-    nnet = GeneticNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
-    nnet.train(feature_set,labels,epochs)
-    genetic_loss.append(nnet.population[
-          list(nnet.population.keys())[0] ]['loss'])
+    # nnet = GeneticNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1,
+    #     verbose=False)
+    # nnet.train(feature_set,labels,epochs)
+    # genetic_loss.append(nnet.population[
+    #       list(nnet.population.keys())[0] ]['loss'])
     # Annealed Neural Network Execution
     nnet = AnnealedNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
     nnet.train(feature_set,labels,epochs)
     annealed_loss.append(nnet.loss[-1])
     # Random Neural Network Execution
-    nnet = RandomSearchNeuralNetwork(layers=[3,1], input_size=3, num_of_classes= 1)
+    nnet = RandomSearchNeuralNetwork(
+        layers=[3,1], input_size=3, num_of_classes= 1)
     nnet.train(feature_set,labels,epochs)
     random_loss.append(nnet.loss[-1])
 
@@ -41,11 +44,11 @@ if __name__ == "__main__":
   print("Variance: {}".format(str(statistics.variance(basic_loss))))
   print("Std Deviation: {}".format(str(statistics.stdev(basic_loss))))
   print('------')
-  print("Genetic Neural Network: ")
-  print("Mean: {}".format(str(statistics.mean(genetic_loss))))
-  print("Variance: {}".format(str(statistics.variance(genetic_loss))))
-  print("Std Deviation: {}".format(str(statistics.stdev(genetic_loss))))
-  print('------')
+  # print("Genetic Neural Network: ")
+  # print("Mean: {}".format(str(statistics.mean(genetic_loss))))
+  # print("Variance: {}".format(str(statistics.variance(genetic_loss))))
+  # print("Std Deviation: {}".format(str(statistics.stdev(genetic_loss))))
+  # print('------')
   print("Annealed Neural Network: ")
   print("Mean: {}".format(str(statistics.mean(annealed_loss))))
   print("Variance: {}".format(str(statistics.variance(annealed_loss))))

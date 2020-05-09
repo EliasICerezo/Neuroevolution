@@ -1,7 +1,7 @@
 from neuroevolution.networks.genetic_neural_network import GeneticNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 import numpy as np
-
+import typing
 
 class StrategyNeuralNetwork(GeneticNeuralNetwork):
   """Module that ensembles an evolutionary-strategy based neural network.

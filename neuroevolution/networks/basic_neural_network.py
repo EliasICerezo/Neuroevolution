@@ -50,9 +50,10 @@ class BasicNeuralNetwork:
     initialization = {}
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:
-        initialization['W{}'.format(i+1)] = np.random.randn(self.layers[i],
-                                                       self.layers[i+1])
-        initialization['b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
+        initialization[
+            'W{}'.format(i+1)] = np.random.randn(self.layers[i], self.layers[i+1])
+        initialization[
+            'b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
     store.update(initialization)
 
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
@@ -64,7 +65,7 @@ class BasicNeuralNetwork:
       epochs -- number of iterations of optimization that the neural network
       will perform
     """  
-    for i in range(epochs):
+    for _ in range(epochs):
       y_hat = self.feed_forward(inputs)
       loss = crossentropy_loss(targets,y_hat)
       self.loss.append(loss)
@@ -85,12 +86,10 @@ class BasicNeuralNetwork:
   def calculate_feed_forward(self, inputs, store):
     for i in range(len(self.layers)-1):
         if i == 0:
-          Z_i = inputs.dot(store['W{}'.format(i+1)]) + store[
-                                      'b{}'.format(i+1)]
+          Z_i = inputs.dot(store['W{}'.format(i+1)]) + store['b{}'.format(i+1)]
           A_i = self.activation_functs[i](Z_i)
         else:
-          Z_i = A_i.dot(store['W{}'.format(i+1)]) + store[
-                                    'b{}'.format(i+1)]
+          Z_i = A_i.dot(store['W{}'.format(i+1)]) + store['b{}'.format(i+1)]
           A_i = self.activation_functs[i](Z_i)
         store['Z{}'.format(i+1)] = Z_i 
         store['A{}'.format(i+1)] = A_i  
@@ -128,9 +127,11 @@ class BasicNeuralNetwork:
     derivatives calculated in the backpropagation pass.
     """
     for i in range(len(self.layers)-1):
-      self.params['W{}'.format(i+1)] = self.params[
-                  'W{}'.format(i+1)] - self.learning_rate * self.params[
-                  'dl_wrt_w{}'.format(i+1)]
-      self.params['b{}'.format(i+1)] = self.params[
-                  'b{}'.format(i+1)] - self.learning_rate * self.params[
-                  'dl_wrt_b{}'.format(i+1)]
+      self.params['W{}'.format(i+1)] = (
+          self.params['W{}'.format(i+1)] -
+          self.learning_rate *
+          self.params['dl_wrt_w{}'.format(i+1)])
+      self.params['b{}'.format(i+1)] = (
+          self.params['b{}'.format(i+1)] -
+          self.learning_rate *
+          self.params['dl_wrt_b{}'.format(i+1)])

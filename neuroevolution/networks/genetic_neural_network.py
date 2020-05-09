@@ -1,17 +1,17 @@
 from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.error_functions import crossentropy_loss
-from neuroevolution.operators.cross_over_operators import single_point_crossover 
-import neuroevolution.operators.mutation_operators as mutations
+from neuroevolution.operators.crossover import single_point_crossover 
+import neuroevolution.operators.mutation as mutations
 import numpy as np
 import inspect
 import random
 import copy
 
 # Genetic operator probabilities in percentage
-SELECTION_PROBABILITY = 10
-MUTATION_PROBABILITY = 20
-CROSSOVER_PROBABILITY = 15
+SELECTION_PROBABILITY = 25
+MUTATION_PROBABILITY = 40
+CROSSOVER_PROBABILITY = 20
 
 
 class GeneticNeuralNetwork(BasicNeuralNetwork):
@@ -19,7 +19,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
   It is evolved via a genetic algorithm
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 10, max_pop_size = 100):
+               activation_functs = None, pop_size = 10, max_pop_size = 100, 
+               verbose = True):
     """Constructor of the Genetic Neural Network
     
     Arguments:
@@ -40,6 +41,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         AttributeError: If any of the given arguments does not agree with the 
         conventions
     """
+    self.verbose = verbose
     self.layers = layers
     self.population = {}
     self.pop_size = pop_size
@@ -94,7 +96,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         population_activated_results -- The activated results calculation
     """
     population_activated_results = {}
-    for (k,v) in self.population.items():
+    for k in self.population.keys():
       y_hat = self.calculate_feed_forward(inputs, self.population[k])
       population_activated_results[k] = y_hat
     return population_activated_results
@@ -113,8 +115,12 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.calculate_loss(activated_results, targets)
       
       # Selection operator
-      if len(self.population.keys()) > self.max_pop_size or np.random.randint(0,101) < SELECTION_PROBABILITY:
+      if (
+          len(self.population.keys()) >
+          self.max_pop_size or np.random.randint(0,101) <
+          SELECTION_PROBABILITY):
         self.selection_operator()
+
       # Mutation operator (it mutates weights and biases)
       self.mutate_population()
       # Crossover operator
@@ -123,6 +129,9 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.population.update(self.additions)
       self.additions = {}
       self.sort_population()
+      if self.verbose:
+        if i % 50 == 0:
+          print("Epochs: {}".format(i))
 
   def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
     """This function calculates the loss for the population of the network
@@ -145,7 +154,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         sigma {float} -- If present, applies certain mutation ponderated rather
         than a random mutaion operattion (default: {None})
     """
-    for (k,v) in self.population.items():
+    for v in self.population.values():
       for i in range(len(self.layers)-1):
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
@@ -187,8 +196,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         key {string} -- The key to crossover, rather it can be W for weights or
         b for biases.
     """
-    [p1,p2] = random.sample(self.population.keys(),k=2)
-    for i in range(len(self.layers)-1):
+    [p1,p2] = random.sample(self.population.keys(), k=2)
+    for i in range(len(self.layers) - 1):
       if np.random.randint(0,100) < CROSSOVER_PROBABILITY:
         p1_copy = copy.deepcopy(self.population[p1])
         p2_copy = copy.deepcopy(self.population[p2])
@@ -209,9 +218,15 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     reduce__dict = (
         lambda x: {
             k:v for index,(k,v) in enumerate(x.items())
-            if index<=self.max_pop_size//division
+            if index<=self.max_pop_size//(division*2)
         })
-    self.population = reduce__dict(self.population)
+    new_pop = {}
+    new_pop = reduce__dict(self.population)
+    for _ in range(len(self.population.keys())//(division*2)):
+      idx = np.random.randint(0,len(self.population.keys()))
+      key = list(self.population.keys())[idx]
+      new_pop[key] = self.population[key]
+    self.population = new_pop
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether

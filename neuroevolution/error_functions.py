@@ -6,7 +6,7 @@ def MSE(x, y):
   y = real values of these predictions
   """
   if len(y) == len(x):
-    error = [ (x[i] - y[i])**2 for i in range(0, len(x))]
+    error = [(x[i] - y[i])**2 for i in range(0, len(x))]
     error = sum(error)
     error = error / len(y)
     return error
