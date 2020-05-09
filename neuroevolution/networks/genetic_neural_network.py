@@ -2,6 +2,7 @@ from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.error_functions import crossentropy_loss
 from neuroevolution.operators.crossover import single_point_crossover 
+import neuroevolution.operators.selection as selection_operators
 import neuroevolution.operators.mutation as mutations
 import numpy as np
 import inspect
@@ -119,7 +120,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
           len(self.population.keys()) >
           self.max_pop_size or np.random.randint(0,101) <
           SELECTION_PROBABILITY):
-        self.selection_operator()
+        self.population = selection_operators.selection(
+            self.population, self.max_pop_size)
 
       # Mutation operator (it mutates weights and biases)
       self.mutate_population()
@@ -209,24 +211,6 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         self.__new_individual(p1_copy)
         self.__new_individual(p2_copy)
 
-  def selection_operator(self, division:float = 5):
-    """Operator that represent the natural selection where they will only survive
-    the 20% of the offspring with the best fitness, that is the minimum loss.
-    """
-    if len(self.population.keys()) <= self.max_pop_size//6:
-      return
-    reduce__dict = (
-        lambda x: {
-            k:v for index,(k,v) in enumerate(x.items())
-            if index<=self.max_pop_size//(division*2)
-        })
-    new_pop = {}
-    new_pop = reduce__dict(self.population)
-    for _ in range(len(self.population.keys())//(division*2)):
-      idx = np.random.randint(0,len(self.population.keys()))
-      key = list(self.population.keys())[idx]
-      new_pop[key] = self.population[key]
-    self.population = new_pop
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether

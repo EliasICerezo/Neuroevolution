@@ -79,7 +79,7 @@ class TestGeneticNN:
   
   def test_selection_operator_is_called_at_least_once_during_training(self, mocker: pytest_mock.mocker):
     selection_mock = mocker.patch(
-      'neuroevolution.networks.genetic_neural_network.GeneticNeuralNetwork.selection_operator'
+      'neuroevolution.networks.genetic_neural_network.selection_operators'
     )
     nnet = GeneticNeuralNetwork([3,1],1,3,None,25)
     feature_set = np.array([[0,1,0],[0,0,1],[1,0,0],[1,1,0],[1,1,1]])

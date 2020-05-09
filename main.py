@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # print(nnet.params)
     # print(nnet.population.keys())
     # print(nnet.feed_forward)
-    nnet.train(feature_set,labels, 1500)
+    nnet.train(feature_set,labels, 7000)
     vs = nnet.population.values()
     vs = list(vs)
     for i in vs: print(i['loss'])
