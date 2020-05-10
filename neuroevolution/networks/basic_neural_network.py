@@ -2,6 +2,10 @@ from neuroevolution.activation_functions import sigmoid, sigmoid_der, relu, relu
 from neuroevolution.error_functions import MSE, crossentropy_loss
 import numpy as np
 import typing
+
+# In this lambda X needs to be a np.array or np.ndarray
+normalize = lambda x,nmin,nmax : (((nmax-nmin)*(x-x.min()))/ (x.max() - x.min()))+nmin
+
 class BasicNeuralNetwork:
   """Class that implements the basic behaviour of a neural network.
   It represents the fully connected networks, so take into account that all the
@@ -12,7 +16,7 @@ class BasicNeuralNetwork:
   """
 
   def __init__(self, layers:list, num_of_classes:int, input_size:int, lr = 0.05,
-               activation_functs = None):
+               activation_functs = None, init_range:tuple = None):
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
@@ -24,12 +28,16 @@ class BasicNeuralNetwork:
     self.learning_rate = lr
     self.params = {}
     self.loss = []
+    self.init_range = init_range
     if layers[-1] != num_of_classes:
       raise AttributeError("The number of classes should match the last layer")
     if layers[0] != input_size:
       raise AttributeError("The input size should match the 1st layer")
     if len(self.layers) == 0:
       raise AttributeError("Can't create a neural net without a single layer ")
+    if init_range != None and len(init_range) != 2:
+      raise AttributeError("Range of weights should contain only 2 components")
+
     self.activation_functs = activation_functs
     if activation_functs is None:
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
@@ -50,10 +58,17 @@ class BasicNeuralNetwork:
     initialization = {}
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:
+        if self.init_range == None or (
+              self.layers[i] == 1 and self.layers[i+1] == 1):
+          initialization[
+              'W{}'.format(i+1)] = np.random.randn(
+              self.layers[i], self.layers[i+1])
+        else:
+          initialization[
+              'W{}'.format(i+1)] = normalize(np.random.randn(self.layers[i],
+              self.layers[i+1]),self.init_range[0], self.init_range[1])
         initialization[
-            'W{}'.format(i+1)] = np.random.randn(self.layers[i], self.layers[i+1])
-        initialization[
-            'b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
+              'b{}'.format(i+1)] = np.random.randn(self.layers[i+1])
     store.update(initialization)
 
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
