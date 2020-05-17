@@ -9,33 +9,15 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
   ways.
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 50, sigma = 0.1, lr = 0.001):
-    """Constructor of the evolutionary strategy based beural network
-    
-    Arguments:
-        layers {list} -- Structure of the network encoded as a list with the 
-        number of nodes in each layer. Note: The network built is a fully 
-        connected one
-        num_of_classes {int} -- The number of classes that is going to 
-        distinguish the network.
-        input_size {int} -- The number of nodes in the input layer
-    
-    Keyword Arguments:
-        activation_functs {[type]} -- A list of the activation functions used
-        in each layer in the forward pass (default: {None})
-        pop_size {int} -- the size of the population to be created in order
-        to optimize the network (default: {50})
-        sigma {float} -- A limitant factor on how much jitter will affect
-        the weights (default: {0.1})
-        lr {float} -- Learning rate. It determines how fast will the
-        algorithm converge (default: {0.001})
-    """        
+               activation_functs = None, pop_size = 50, sigma = 0.1, lr = 0.01,
+               verbose:bool =True):       
     self.learning_rate = lr
     self.sigma = sigma
     self.pop_size = pop_size
     self.layers = layers
     self.population = {}
     self.additions = {}
+    self.verbose = verbose
     if len(self.layers) == 0:
       raise AttributeError("Can't create a neural net without a single layer ")
     if pop_size <1:
@@ -53,14 +35,19 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     self.initialize_weithts_and_biases(pop_size=1)
   
   def train(self, inputs: np.ndarray, targets: np.ndarray, epochs: int):
-    """Training loop, it mutates the weights, biases, selects and orders the
-    population in order to reduce the objective function, in this case
-    crossentropy
-    
+    """Training method. It loops epochs times and tries to find the global 
+    minima, in this case by aplying a natural evolutionary strategy. If verbose
+    is present it prints every 10 epochs the loss value that contains the 
+    original_solution. This solution is mutated every epoch in search for the
+    global minimum in every problem.
+
     Arguments:
-        inputs {np.ndarray} -- Input array with the features
-        targets {np.ndarray} -- Target array, or labels
+        inputs {np.ndarray} -- Inputs array
+        targets {np.ndarray} -- Real values array
         epochs {int} -- Number of iterations
+
+    Raises:
+        AttributeError: If the array comes initialized with more than 1 solution
     """
     if len(self.population.keys()) != 1:
       raise AttributeError("Can't have more than one solution in this state of the program")
@@ -69,6 +56,15 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     original_solution = self.population[list(self.population.keys())[0]]
     print("Initial loss: {}".format(original_solution['loss']))
     for i in range(epochs):
+      if self.verbose and i % 10 ==0:
+        temp_pop = self.population
+        self.population = {"P0":original_solution}
+        activated_results = self.evolved_feed_forward(inputs)
+        self.calculate_loss(activated_results,targets)
+        original_solution = self.population[list(self.population.keys())[0]]
+        self.population = temp_pop
+        print("Epoch {}: Original Solution Loss: {}".format(
+            i, original_solution['loss']))
       self.initialize_weithts_and_biases(pop_size=self.pop_size)
       self.jitter_population(original_solution)
       activated_results = self.evolved_feed_forward(inputs)
@@ -76,18 +72,30 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
       standard_losses = self.standarize_loss()
       self.update_weights(standard_losses,original_solution)
       self.additions = {}
-    
     self.population = {"final_solution": original_solution}
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results,targets)
 
   def update_weights(self, standard_losses:np.array, original_solution:dict):
+    """Method that updates the weights and biases in the original solution
+
+    Arguments:
+        standard_losses {np.array} -- List of standard losses
+        original_solution {dict} -- Original solution where the weights 
+        are going to be updated
+    """
     for i,v in enumerate(self.population.values()):
       for (a,b) in v.items():
-        original_solution[a] = original_solution[a] + self.learning_rate/(
+        original_solution[a] = original_solution[a] - self.learning_rate/(
             self.pop_size*self.sigma) * np.dot(b,standard_losses[i])
+    
 
   def standarize_loss(self):
+    """Method that normalizes the loss between 0 and 1
+
+    Returns:
+        list -- List of losses normalized
+    """
     vs = list(self.population.values())
     losses = []
     for i in vs:
@@ -97,12 +105,15 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     
 
   def jitter_population(self, original_solution:dict):
-    # breakpoint()
+    """Method that generates pop_size jitters of the original solution using 
+    random normal distributed noise (gaussian noise) ponderated by sigma.
+
+    Arguments:
+        original_solution {dict} -- Used to generate the jittered population
+    """
     for (_,v) in self.population.items():
       jittered_individual = {}
       for (a,b) in v.items():
-        # breakpoint()
-        jittered_individual[a] = original_solution[a] + (self.sigma * b)
-      # breakpoint()
+        jittered_individual[a] = original_solution[a] - (self.sigma * b)
       self.new_individual(jittered_individual)
     self.population = self.additions
