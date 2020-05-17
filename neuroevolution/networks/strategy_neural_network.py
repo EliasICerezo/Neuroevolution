@@ -50,7 +50,8 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
         AttributeError: If the array comes initialized with more than 1 solution
     """
     if len(self.population.keys()) != 1:
-      raise AttributeError("Can't have more than one solution in this state of the program")
+      raise AttributeError(
+        "Can't have more than one solution in this state of the program")
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results,targets)
     original_solution = self.population[list(self.population.keys())[0]]

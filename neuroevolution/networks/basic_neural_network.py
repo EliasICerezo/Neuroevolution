@@ -20,7 +20,7 @@ class BasicNeuralNetwork:
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
-      layers -- List of numbers that ensemble the number of neurons od each layer
+      layers -- Number's list that ensemble the number of neurons of each layer
       lr -- Stands for learning rate and it ts the size of the movement once you
       start training it.
     """ 
@@ -49,7 +49,8 @@ class BasicNeuralNetwork:
     are not uniformly distributed which can cause a slower convergence.
     
     Keyword Arguments:
-        store {dict} -- Dictionary to put the initialization if provided (default: {None})
+        store {dict} -- Dictionary to put the initialization if provided
+        (default: {None})
     
     Returns:
         [type] -- [description]
@@ -86,7 +87,6 @@ class BasicNeuralNetwork:
       self.loss.append(loss)
       self.backpropagation(inputs,y=targets,y_hat=y_hat)
       self.__weight_updating()
-
 
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
