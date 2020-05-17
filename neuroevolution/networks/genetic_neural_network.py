@@ -69,12 +69,14 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.activation_functs = [sigmoid for i in range(len(self.layers))]
     self.initialize_weithts_and_biases()
   
-  def initialize_weithts_and_biases(self):
+  def initialize_weithts_and_biases(self, pop_size = 0):
     """Function that initializes the actual weights and biases of the neural net
     using the previous attributes.
     """
+    if pop_size == 0:
+      pop_size = self.pop_size
     np.random.seed = 42
-    for pop_index in range(self.pop_size):
+    for pop_index in range(pop_size):
       population_encoded_string = "P{}".format(pop_index)
       self.population[population_encoded_string] = {}
       for i, e in enumerate(self.layers):
@@ -181,7 +183,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       npop[k] = v
     self.population = npop
 
-  def __new_individual(self, individual:dict):
+  def new_individual(self, individual:dict):
     """Function that will add a new individual to the population
     
     Arguments:
