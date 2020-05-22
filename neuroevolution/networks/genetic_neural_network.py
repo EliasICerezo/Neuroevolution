@@ -165,13 +165,13 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
           elem = v_copy['W{}'.format(i+1)]
           elem = self.__mutation_operator(elem,sigma)
           v_copy['W{}'.format(i+1)] = elem
-          self.__new_individual(v_copy)
+          self.new_individual(v_copy)
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
           elem = v_copy['b{}'.format(i+1)]
           elem = self.__mutation_operator(elem,sigma)
           v_copy['b{}'.format(i+1)] = elem
-          self.__new_individual(v_copy)
+          self.new_individual(v_copy)
 
   def sort_population(self):
     """Function that sorts the population over loss values ascending
@@ -210,8 +210,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         new_elements = single_point_crossover(w_1, w_2)
         p1_copy['{}{}'.format(key,i+1)] = new_elements[0]
         p2_copy['{}{}'.format(key,i+1)] = new_elements[1]
-        self.__new_individual(p1_copy)
-        self.__new_individual(p2_copy)
+        self.new_individual(p1_copy)
+        self.new_individual(p2_copy)
 
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
