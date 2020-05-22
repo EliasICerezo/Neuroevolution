@@ -81,6 +81,12 @@ class BasicNeuralNetwork:
       epochs -- number of iterations of optimization that the neural network
       will perform
     """  
+    # Testing if the labels need to be reshaped
+    try:
+      targets.shape[1]
+    except:
+      targets = targets.reshape(targets.shape[0],1)
+
     for _ in range(epochs):
       y_hat = self.feed_forward(inputs)
       loss = crossentropy_loss(targets,y_hat)
