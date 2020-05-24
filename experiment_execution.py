@@ -79,7 +79,7 @@ def genetic_nn_tenant():
 
 
 def strategy_nn_tenant():
-  nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1], verbose=False)
   init_t = time.time()
   loss = nnet.train(inputs, labels, num_epochs)
   t = time.time() - init_t
@@ -99,23 +99,33 @@ def random_nn_tenant():
 
 if __name__ == "__main__":
   
-  num_epochs = 2
+  num_epochs = 10
   labels_list, inputs_list = init_datasets()
   
   datasets = ['heart', 'iris', 'breast_cancer', 'wine']
   dfidx = 0
-  for r in PRIMES[:2]:
+  for r in PRIMES:
     np.random.seed = r
     for i in range(len(labels_list)):
       labels = labels_list[i]
       inputs = inputs_list[i]
+      t1 = threading.Thread(target=basic_nn_tenant)
+      t2 = threading.Thread(target=genetic_nn_tenant)
+      t3 = threading.Thread(target=strategy_nn_tenant)
+      t4 = threading.Thread(target=random_nn_tenant)
+      t1.daemon = True
+      t2.daemon = True
+      t3.daemon = True
+      t4.daemon = True
+      t1.start()
+      t2.start()
+      t3.start()
+      t4.start()
 
-      basic_nn_tenant()
+      t1.join()
+      t2.join()
+      t3.join()
+      t4.join()
 
-      genetic_nn_tenant()
-
-      strategy_nn_tenant()
-      
-      random_nn_tenant()
-      print("Inner Loop iteration: {}".format(i))
+      print(df)
   breakpoint()
