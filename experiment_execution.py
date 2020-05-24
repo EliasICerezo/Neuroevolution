@@ -9,6 +9,11 @@ import pandas as pd
 import numpy as np
 import os
 
+PRIMES = [3,17,101,5003,70001,600011,1234577,98765441,198765433,1928765459,
+          19728765443,179728765483,1979728765451,12979728765461,129797287625459,
+          1729797287625437,11,1861,257,49297,849347,1849283,71849363,731849389,
+          3731849309,13731849301,213731849351,1213731849359,7,8819]
+
 def prepare_dataset(csvname:str, transform_list:typing.List[str],
     drop_list: typing.List[str] = [], labels_id:str = 'y'):
   if not os.path.isfile(csvname):
@@ -20,18 +25,38 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 
 
 if __name__ == "__main__":
-    inputs,labels = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
-    nnet = BasicNeuralNetwork([inputs.shape[1], 4, 1], 1, inputs.shape[1])
-    nnet.train(inputs, labels, 300)
-    print(nnet.loss)
-    nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-    nnet.train(inputs, labels, 50)
-    vs = list(nnet.population.values())
-    for i in vs: print(i['loss'])
-    nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-    nnet.train(inputs, labels, 50)
-    vs = list(nnet.population.values())
-    for i in vs: print(i['loss'])
-    nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-    nnet.train(inputs, labels, 50)
-    print(nnet.loss)
+    inputs_list = []
+    labels_list = []
+    i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
+    inputs_list.append(i)
+    labels_list.append(lab)
+    i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', [], ['sample_number'], 'y')
+    inputs_list.append(i)
+    labels_list.append(lab)
+    i,lab = prepare_dataset('datasets/wine.csv', [], ['price'], 'y')
+    inputs_list.append(i)
+    labels_list.append(lab)
+    i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
+    inputs_list.append(i)
+    labels_list.append(lab)
+
+    for r in PRIMES:
+      np.random.seed = r
+      breakpoint()
+      for i in range(len(labels_list)):
+        labels = labels_list[i]
+        inputs = inputs_list[i]
+        # nnet = BasicNeuralNetwork([inputs.shape[1], 4, 1], 1, inputs.shape[1])
+        # nnet.train(inputs, labels, 50)
+        # print(nnet.loss)
+        nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+        nnet.train(inputs, labels, 50)
+        vs = list(nnet.population.values())
+        for i in vs: print(i['loss'])
+        nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+        nnet.train(inputs, labels, 50)
+        vs = list(nnet.population.values())
+        for i in vs: print(i['loss'])
+        nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+        nnet.train(inputs, labels, 50)
+        print(nnet.loss)
