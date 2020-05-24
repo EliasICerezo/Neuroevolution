@@ -17,4 +17,5 @@ class RandomSearchNeuralNetwork(BasicNeuralNetwork):
         best_individual = new_individual
         self.loss.append(new_individual['loss'])
     self.params = best_individual
+    return self.params['loss']
     

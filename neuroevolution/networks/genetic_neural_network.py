@@ -136,6 +136,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       if self.verbose:
         if i % 50 == 0:
           print("Epochs: {}".format(i))
+    return self.population[list(self.population.keys())[0]]['loss']
 
   def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
     """This function calculates the loss for the population of the network

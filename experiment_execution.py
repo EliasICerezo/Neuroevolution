@@ -25,23 +25,30 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
   return helpers.extract_inputs_and_labels(df,labels_id,drop_list)
 
 
-if __name__ == "__main__":
-    inputs_list = []
-    labels_list = []
-    i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
-    inputs_list.append(i)
-    labels_list.append(lab)
-    i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
-    inputs_list.append(i)
-    labels_list.append(lab)
-    i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', [], ['sample_number'], 'y')
-    inputs_list.append(i)
-    labels_list.append(lab)
-    i,lab = prepare_dataset('datasets/wine.csv', [], ['price'], 'y')
-    inputs_list.append(i)
-    labels_list.append(lab)
 
-    num_epochs = 3
+def init_datasets():
+  inputs_list = []
+  labels_list = []
+  i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
+  inputs_list.append(i)
+  labels_list.append(lab)
+  i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
+  inputs_list.append(i)
+  labels_list.append(lab)
+  i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', [], ['sample_number'], 'y')
+  inputs_list.append(i)
+  labels_list.append(lab)
+  i,lab = prepare_dataset('datasets/wine.csv', [], ['price'], 'y')
+  inputs_list.append(i)
+  labels_list.append(lab)
+  return labels_list, inputs_list
+
+if __name__ == "__main__":
+    num_epochs = 10
+    labels_list, inputs_list = init_datasets()
+    df = pd.DataFrame(columns = ['dataset','neural_network','training_loss', 'time', 'number_of_folds'])
+    datasets = ['heart', 'iris', 'breast_cancer', 'wine']
+    dfidx = 0
     for r in PRIMES:
       np.random.seed = r
       for i in range(len(labels_list)):
@@ -49,23 +56,34 @@ if __name__ == "__main__":
         inputs = inputs_list[i]
         nnet = BasicNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
         init_t = time.time()
-        nnet.train(inputs, labels, num_epochs)
+        loss = nnet.train(inputs, labels, num_epochs)
         t = time.time() - init_t
-        print(nnet.loss)
+        n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
+            'training_loss':loss, 'time':t, 'number_of_folds': 1}
+        df = df.append(n_row, ignore_index=True)
+        
         nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
         init_t = time.time()
-        nnet.train(inputs, labels, num_epochs)
+        loss = nnet.train(inputs, labels, num_epochs)
         t = time.time() - init_t
-        vs = list(nnet.population.values())
-        for i in vs: print(i['loss'])
+        n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
+            'training_loss':loss, 'time':t, 'number_of_folds': 1}
+        df = df.append(n_row, ignore_index=True)
+
         nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
         init_t = time.time()
-        nnet.train(inputs, labels, num_epochs)
+        loss = nnet.train(inputs, labels, num_epochs)
         t = time.time() - init_t
-        vs = list(nnet.population.values())
-        for i in vs: print(i['loss'])
+        n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
+            'training_loss':loss, 'time':t, 'number_of_folds': 1}
+        df = df.append(n_row, ignore_index=True)
+        
         nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
         init_t = time.time()
-        nnet.train(inputs, labels, num_epochs)
+        loss = nnet.train(inputs, labels, num_epochs)
         t = time.time() - init_t
-        print(nnet.loss)
+        n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
+            'training_loss':loss, 'time':t, 'number_of_folds': 1}
+        df = df.append(n_row, ignore_index=True)
+        print("Inner Loop iteration: {}".format(i))
+    breakpoint()

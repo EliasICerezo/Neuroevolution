@@ -76,6 +76,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     self.population = {"final_solution": original_solution}
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results,targets)
+    return self.population['final_solution']['loss']
 
   def update_weights(self, standard_losses:np.array, original_solution:dict):
     """Method that updates the weights and biases in the original solution

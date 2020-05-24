@@ -93,6 +93,7 @@ class BasicNeuralNetwork:
       self.loss.append(loss)
       self.backpropagation(inputs,y=targets,y_hat=y_hat)
       self.__weight_updating()
+      return self.loss[-1]
 
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
