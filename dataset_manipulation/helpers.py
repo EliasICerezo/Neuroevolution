@@ -55,5 +55,5 @@ def extract_inputs_and_labels(df:pd.DataFrame,
   df_copy = df_copy.drop(columns=drop_list)
   labels = df_copy[labels_name].to_numpy()
   df_copy = df_copy.drop(columns=[labels_name])
-  inputs = df_copy.to_numpy()
+  inputs = df_copy.to_numpy(dtype=float)
   return (inputs, labels)

@@ -8,6 +8,7 @@ import typing
 import pandas as pd
 import numpy as np
 import os
+import time
 
 PRIMES = [3,17,101,5003,70001,600011,1234577,98765441,198765433,1928765459,
           19728765443,179728765483,1979728765451,12979728765461,129797287625459,
@@ -27,6 +28,9 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 if __name__ == "__main__":
     inputs_list = []
     labels_list = []
+    i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
+    inputs_list.append(i)
+    labels_list.append(lab)
     i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
     inputs_list.append(i)
     labels_list.append(lab)
@@ -36,27 +40,32 @@ if __name__ == "__main__":
     i,lab = prepare_dataset('datasets/wine.csv', [], ['price'], 'y')
     inputs_list.append(i)
     labels_list.append(lab)
-    i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
-    inputs_list.append(i)
-    labels_list.append(lab)
 
+    num_epochs = 3
     for r in PRIMES:
       np.random.seed = r
-      breakpoint()
       for i in range(len(labels_list)):
         labels = labels_list[i]
         inputs = inputs_list[i]
-        # nnet = BasicNeuralNetwork([inputs.shape[1], 4, 1], 1, inputs.shape[1])
-        # nnet.train(inputs, labels, 50)
-        # print(nnet.loss)
+        nnet = BasicNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+        init_t = time.time()
+        nnet.train(inputs, labels, num_epochs)
+        t = time.time() - init_t
+        print(nnet.loss)
         nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        nnet.train(inputs, labels, 50)
+        init_t = time.time()
+        nnet.train(inputs, labels, num_epochs)
+        t = time.time() - init_t
         vs = list(nnet.population.values())
         for i in vs: print(i['loss'])
         nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        nnet.train(inputs, labels, 50)
+        init_t = time.time()
+        nnet.train(inputs, labels, num_epochs)
+        t = time.time() - init_t
         vs = list(nnet.population.values())
         for i in vs: print(i['loss'])
         nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        nnet.train(inputs, labels, 50)
+        init_t = time.time()
+        nnet.train(inputs, labels, num_epochs)
+        t = time.time() - init_t
         print(nnet.loss)
