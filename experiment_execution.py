@@ -9,11 +9,15 @@ import pandas as pd
 import numpy as np
 import os
 import time
+import threading
 
 PRIMES = [3,17,101,5003,70001,600011,1234577,98765441,198765433,1928765459,
           19728765443,179728765483,1979728765451,12979728765461,129797287625459,
           1729797287625437,11,1861,257,49297,849347,1849283,71849363,731849389,
           3731849309,13731849301,213731849351,1213731849359,7,8819]
+
+df = pd.DataFrame(columns = ['dataset','neural_network','training_loss', 'time', 'number_of_folds'])
+resource_lock = threading.Lock()
 
 def prepare_dataset(csvname:str, transform_list:typing.List[str],
     drop_list: typing.List[str] = [], labels_id:str = 'y'):
@@ -43,47 +47,75 @@ def init_datasets():
   labels_list.append(lab)
   return labels_list, inputs_list
 
-if __name__ == "__main__":
-    num_epochs = 10
-    labels_list, inputs_list = init_datasets()
-    df = pd.DataFrame(columns = ['dataset','neural_network','training_loss', 'time', 'number_of_folds'])
-    datasets = ['heart', 'iris', 'breast_cancer', 'wine']
-    dfidx = 0
-    for r in PRIMES:
-      np.random.seed = r
-      for i in range(len(labels_list)):
-        labels = labels_list[i]
-        inputs = inputs_list[i]
-        nnet = BasicNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        init_t = time.time()
-        loss = nnet.train(inputs, labels, num_epochs)
-        t = time.time() - init_t
-        n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
-            'training_loss':loss, 'time':t, 'number_of_folds': 1}
-        df = df.append(n_row, ignore_index=True)
-        
-        nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        init_t = time.time()
-        loss = nnet.train(inputs, labels, num_epochs)
-        t = time.time() - init_t
-        n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
-            'training_loss':loss, 'time':t, 'number_of_folds': 1}
-        df = df.append(n_row, ignore_index=True)
 
-        nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        init_t = time.time()
-        loss = nnet.train(inputs, labels, num_epochs)
-        t = time.time() - init_t
-        n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
-            'training_loss':loss, 'time':t, 'number_of_folds': 1}
-        df = df.append(n_row, ignore_index=True)
-        
-        nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
-        init_t = time.time()
-        loss = nnet.train(inputs, labels, num_epochs)
-        t = time.time() - init_t
-        n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
-            'training_loss':loss, 'time':t, 'number_of_folds': 1}
-        df = df.append(n_row, ignore_index=True)
-        print("Inner Loop iteration: {}".format(i))
-    breakpoint()
+def save_into_df(n_row:dict):
+  resource_lock.acquire()
+  try:
+    global df
+    df = df.append(n_row, ignore_index=True)
+  finally:
+    resource_lock.release()
+  return df
+
+
+def basic_nn_tenant():
+  nnet = BasicNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  init_t = time.time()
+  loss = nnet.train(inputs, labels, num_epochs)
+  t = time.time() - init_t
+  n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
+      'training_loss':loss, 'time':t, 'number_of_folds': 1}
+  save_into_df(n_row)
+
+
+def genetic_nn_tenant():
+  nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  init_t = time.time()
+  loss = nnet.train(inputs, labels, num_epochs)
+  t = time.time() - init_t
+  n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
+      'training_loss':loss, 'time':t, 'number_of_folds': 1}
+  save_into_df(n_row)
+
+
+def strategy_nn_tenant():
+  nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  init_t = time.time()
+  loss = nnet.train(inputs, labels, num_epochs)
+  t = time.time() - init_t
+  n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
+      'training_loss':loss, 'time':t, 'number_of_folds': 1}
+  save_into_df(n_row)
+
+
+def random_nn_tenant():
+  nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  init_t = time.time()
+  loss = nnet.train(inputs, labels, num_epochs)
+  t = time.time() - init_t
+  n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
+      'training_loss':loss, 'time':t, 'number_of_folds': 1}
+  save_into_df(n_row)
+
+if __name__ == "__main__":
+  
+  num_epochs = 2
+  labels_list, inputs_list = init_datasets()
+  
+  datasets = ['heart', 'iris', 'breast_cancer', 'wine']
+  dfidx = 0
+  for r in PRIMES[:2]:
+    np.random.seed = r
+    for i in range(len(labels_list)):
+      labels = labels_list[i]
+      inputs = inputs_list[i]
+
+      basic_nn_tenant()
+
+      genetic_nn_tenant()
+
+      strategy_nn_tenant()
+      
+      random_nn_tenant()
+      print("Inner Loop iteration: {}".format(i))
+  breakpoint()
