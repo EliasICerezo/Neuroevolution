@@ -33,16 +33,16 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 def init_datasets():
   inputs_list = []
   labels_list = []
-  i,lab = prepare_dataset('datasets/processed.cleveland.csv', [], [], 'y')
+  i,lab = prepare_dataset('datasets/processed.cleveland.csv', ['y'], [], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
   i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
-  i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', [], ['sample_number'], 'y')
+  i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', ['y'], ['sample_number'], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
-  i,lab = prepare_dataset('datasets/wine.csv', [], ['price'], 'y')
+  i,lab = prepare_dataset('datasets/wine.csv', ['y'], ['price'], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
   return labels_list, inputs_list
