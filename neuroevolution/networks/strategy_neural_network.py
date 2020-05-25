@@ -78,6 +78,20 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
     self.calculate_loss(activated_results,targets)
     return self.population['final_solution']['loss']
 
+    def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    activated_results = self.evolved_feed_forward(inputs)
+    self.calculate_loss(activated_results,targets)
+    return self.population['final_solution']['loss']
+
   def update_weights(self, standard_losses:np.array, original_solution:dict):
     """Method that updates the weights and biases in the original solution
 

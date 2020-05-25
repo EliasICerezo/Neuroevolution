@@ -95,6 +95,20 @@ class BasicNeuralNetwork:
       self.__weight_updating()
       return self.loss[-1]
 
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    y_hat = self.feed_forward(inputs)
+    loss = crossentropy_loss(labels,y_hat)
+    return loss
+
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
     computes the dot product between the features and the weights and then adds

@@ -18,4 +18,18 @@ class RandomSearchNeuralNetwork(BasicNeuralNetwork):
         self.loss.append(new_individual['loss'])
     self.params = best_individual
     return self.params['loss']
+
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    activated_results = self.calculate_feed_forward(inputs, self.params)
+    loss = crossentropy_loss(labels,activated_results)
+    return loss
     
