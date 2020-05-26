@@ -139,22 +139,22 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
     return self.population[list(self.population.keys())[0]]['loss']
 
   def test(self, inputs: np.ndarray, labels: np.ndarray):
-  """Function used to test the final resolution of the neural network
+    """Function used to test the final resolution of the neural network
 
-  Arguments:
-      inputs {np.ndarray} -- Inputs for the algorithm
-      labels {np.ndarray} -- Labels for the inputs
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
 
-  Returns:
-    loss -- loss of the data passed into it
-  """
-  temp = self.population
-  self.population = self.population[list(self.population.keys())[0]]
-  activated_results = self.evolved_feed_forward(inputs)
-  self.calculate_loss(activated_results, labels)
-  loss = self.population[list(self.population.keys())[0]]['loss']
-  self.population = temp
-  return loss
+    Returns:
+      loss -- loss of the data passed into it
+    """
+    temp = self.population
+    self.population = self.population[list(self.population.keys())[0]]
+    activated_results = self.evolved_feed_forward(inputs)
+    self.calculate_loss(activated_results, labels)
+    loss = self.population[list(self.population.keys())[0]]['loss']
+    self.population = temp
+    return loss 
 
   def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
     """This function calculates the loss for the population of the network

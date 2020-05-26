@@ -86,7 +86,6 @@ class BasicNeuralNetwork:
       targets.shape[1]
     except:
       targets = targets.reshape(targets.shape[0],1)
-
     for _ in range(epochs):
       y_hat = self.feed_forward(inputs)
       loss = crossentropy_loss(targets,y_hat)
@@ -120,6 +119,7 @@ class BasicNeuralNetwork:
     return self.calculate_feed_forward(inputs,self.params)
   
   def calculate_feed_forward(self, inputs, store):
+    # breakpoint()
     for i in range(len(self.layers)-1):
         if i == 0:
           Z_i = inputs.dot(store['W{}'.format(i+1)]) + store['b{}'.format(i+1)]

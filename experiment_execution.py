@@ -60,9 +60,9 @@ def save_into_df(n_row:dict):
 
 
 def basic_nn_tenant():
-  nnet = BasicNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  nnet = BasicNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
-  loss = nnet.train(inputs, labels, num_epochs)
+  loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
       'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
@@ -70,9 +70,9 @@ def basic_nn_tenant():
 
 
 def genetic_nn_tenant():
-  nnet = GeneticNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  nnet = GeneticNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
-  loss = nnet.train(inputs, labels, num_epochs)
+  loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
       'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
@@ -80,9 +80,9 @@ def genetic_nn_tenant():
 
 
 def strategy_nn_tenant():
-  nnet = StrategyNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1], verbose=False)
+  nnet = StrategyNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1], verbose=False)
   init_t = time.time()
-  loss = nnet.train(inputs, labels, num_epochs)
+  loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
       'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
@@ -90,16 +90,16 @@ def strategy_nn_tenant():
 
 
 def random_nn_tenant():
-  nnet = RandomSearchNeuralNetwork([inputs.shape[1], 10, 1], 1, inputs.shape[1])
+  nnet = RandomSearchNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
-  loss = nnet.train(inputs, labels, num_epochs)
+  loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
       'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
   save_into_df(n_row)
 
 if __name__ == "__main__":
-  
+  number_of_folds = 5
   num_epochs = 10
   labels_list, inputs_list = init_datasets()
   
@@ -110,7 +110,20 @@ if __name__ == "__main__":
     for i in range(len(labels_list)):
       labels = labels_list[i]
       inputs = inputs_list[i]
-      kf = KFold(5,shuffle=True, random_state=r)
+      kf = KFold(number_of_folds,shuffle=True, random_state=r)
+      tr_gen = kf.split(inputs,labels)
+      tr = []
+      te = []
+      for training,testing in tr_gen:
+        tr.append(training)
+        te.append(testing)
+      random_selection = np.random.randint(0,number_of_folds)
+      tr_idx, te_idx = (tr[random_selection],te[random_selection])
+      tr_data = inputs[tr_idx]
+      tr_labels = labels[tr_idx]
+      te_data = inputs[te_idx]
+      te_labels = labels[te_idx]
+      # breakpoint()
       # TODO: Viability of using the kfold
       t1 = threading.Thread(target=basic_nn_tenant)
       t2 = threading.Thread(target=genetic_nn_tenant)

@@ -82,18 +82,18 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
       self.loss.append(cost)
 
     def test(self, inputs: np.ndarray, labels: np.ndarray):
-    """Function used to test the final resolution of the neural network
+      """Function used to test the final resolution of the neural network
 
-    Arguments:
-        inputs {np.ndarray} -- Inputs for the algorithm
-        labels {np.ndarray} -- Labels for the inputs
+      Arguments:
+          inputs {np.ndarray} -- Inputs for the algorithm
+          labels {np.ndarray} -- Labels for the inputs
 
-    Returns:
-        loss -- loss of the data passed into it
-    """
-    activated_results = self.feed_forward(inputs)
-    cost = error_functions.crossentropy_loss(labels, activated_results)
-    return cost
+      Returns:
+          loss -- loss of the data passed into it
+      """
+      activated_results = self.feed_forward(inputs)
+      cost = error_functions.crossentropy_loss(labels, activated_results)
+      return cost
 
   def random_mutation(self, values:np.ndarray):
     """Function that privides a random mutation in the weights or biases.
