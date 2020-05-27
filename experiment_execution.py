@@ -32,6 +32,12 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 
 
 def init_datasets():
+  """Method that process the datasets and prepares them to be used in the
+  different neural networks
+
+  Returns:
+      list,list -- Label list and inputs list
+  """
   inputs_list = []
   labels_list = []
   i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
@@ -50,6 +56,15 @@ def init_datasets():
 
 
 def save_into_df(n_row:dict):
+  """Method that saves into the dataframe the data collected by the neural
+  network
+
+  Arguments:
+      n_row {dict} -- Row to be inserted in the dataframe
+
+  Returns:
+      dataframe -- Updated dataframe
+  """
   resource_lock.acquire()
   try:
     global df
@@ -60,6 +75,8 @@ def save_into_df(n_row:dict):
 
 
 def basic_nn_tenant():
+  """Basic Neural Network tenant to be executed concurrently
+  """
   nnet = BasicNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
@@ -71,6 +88,8 @@ def basic_nn_tenant():
 
 
 def genetic_nn_tenant():
+  """Genetic Neural Network tenant to be executed concurrently
+  """
   nnet = GeneticNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
@@ -82,6 +101,8 @@ def genetic_nn_tenant():
 
 
 def strategy_nn_tenant():
+  """Strategy Neural Network tenant to be executed concurrently
+  """
   nnet = StrategyNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1], verbose=False)
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
@@ -93,6 +114,8 @@ def strategy_nn_tenant():
 
 
 def random_nn_tenant():
+  """Random Neural Network tenant to be executed concurrently
+  """
   nnet = RandomSearchNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
@@ -103,6 +126,8 @@ def random_nn_tenant():
   save_into_df(n_row)
 
 def annealed_nn_tenant():
+  """Simulated Annealing Neural Network tenant to be executed concurrently
+  """
   nnet = AnnealedNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
@@ -116,7 +141,6 @@ if __name__ == "__main__":
   number_of_folds = 10
   num_epochs = 5
   labels_list, inputs_list = init_datasets()
-  
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
   for r in PRIMES:
@@ -137,8 +161,6 @@ if __name__ == "__main__":
       tr_labels = labels[tr_idx]
       te_data = inputs[te_idx]
       te_labels = labels[te_idx]
-      # breakpoint()
-      # TODO: Viability of using the kfold
       t1 = threading.Thread(target=basic_nn_tenant)
       t2 = threading.Thread(target=genetic_nn_tenant)
       t3 = threading.Thread(target=strategy_nn_tenant)
@@ -154,12 +176,10 @@ if __name__ == "__main__":
       t3.start()
       t4.start()
       t5.start()
-
       t1.join()
       t2.join()
       t3.join()
       t4.join()
       t5.join()
-
       print(df)
   breakpoint()

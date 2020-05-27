@@ -149,7 +149,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       loss -- loss of the data passed into it
     """
     temp = self.population
-    self.population = {'test_solution' : self.population[list(self.population.keys())[0]]}
+    self.population = {
+          'test_solution' : self.population[list(self.population.keys())[0]]}
 
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results, labels)
