@@ -34,16 +34,16 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 def init_datasets():
   inputs_list = []
   labels_list = []
-  i,lab = prepare_dataset('datasets/processed.cleveland.csv', ['y'], [], 'new_y')
+  i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
-  i,lab = prepare_dataset('datasets/iris.csv', ['y'], [], 'new_y')
+  i,lab = prepare_dataset('datasets/wine.csv', ['y'], ['price'], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
   i,lab = prepare_dataset('datasets/breast-cancer-wisconsin.csv', ['y'], ['sample_number'], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
-  i,lab = prepare_dataset('datasets/wine.csv', ['y'], ['price'], 'new_y')
+  i,lab = prepare_dataset('datasets/processed.cleveland.csv', ['y'], [], 'new_y')
   inputs_list.append(i)
   labels_list.append(lab)
   return labels_list, inputs_list
@@ -64,8 +64,9 @@ def basic_nn_tenant():
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
+  te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
-      'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
   save_into_df(n_row)
 
 
@@ -74,8 +75,9 @@ def genetic_nn_tenant():
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
+  te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
-      'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
   save_into_df(n_row)
 
 
@@ -84,8 +86,9 @@ def strategy_nn_tenant():
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
+  te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
-      'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
   save_into_df(n_row)
 
 
@@ -94,16 +97,27 @@ def random_nn_tenant():
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
+  te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
-      'training_loss':loss, 'testing_loss':0, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+  save_into_df(n_row)
+
+def annealed_nn_tenant():
+  nnet = AnnealedNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
+  init_t = time.time()
+  loss = nnet.train(tr_data, tr_labels, num_epochs)
+  t = time.time() - init_t
+  te_loss = nnet.test(te_data, te_labels)
+  n_row = {'dataset': datasets[i], 'neural_network':'AnnealedNN',
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
   save_into_df(n_row)
 
 if __name__ == "__main__":
-  number_of_folds = 5
-  num_epochs = 10
+  number_of_folds = 10
+  num_epochs = 5
   labels_list, inputs_list = init_datasets()
   
-  datasets = ['heart', 'iris', 'breast_cancer', 'wine']
+  datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
   for r in PRIMES:
     np.random.seed = r
@@ -129,19 +143,23 @@ if __name__ == "__main__":
       t2 = threading.Thread(target=genetic_nn_tenant)
       t3 = threading.Thread(target=strategy_nn_tenant)
       t4 = threading.Thread(target=random_nn_tenant)
+      t5 = threading.Thread(target=annealed_nn_tenant)
       t1.daemon = True
       t2.daemon = True
       t3.daemon = True
       t4.daemon = True
+      t5.daemon = True
       t1.start()
       t2.start()
       t3.start()
       t4.start()
+      t5.start()
 
       t1.join()
       t2.join()
       t3.join()
       t4.join()
+      t5.join()
 
       print(df)
   breakpoint()

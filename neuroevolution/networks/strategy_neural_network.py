@@ -9,7 +9,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
   ways.
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 50, sigma = 0.3, lr = 0.01,
+               activation_functs = None, pop_size = 50, sigma = 0.5, lr = 0.1,
                verbose:bool =True):       
     self.learning_rate = lr
     self.sigma = sigma

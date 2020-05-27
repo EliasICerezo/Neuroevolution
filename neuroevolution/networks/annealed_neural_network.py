@@ -9,7 +9,7 @@ MUTATION_PROBABILITY = 40
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
   def __init__(self, layers: list, num_of_classes: int, input_size: int,
-               temperature = 100, decay = 0.05, boltzmann_constant = 10, activation_functs = None):
+               temperature = 100, decay = 0.1, boltzmann_constant = 10, activation_functs = None):
     """Constructor of the simulated annealing-optimized neural network.
     
     Arguments:
@@ -61,7 +61,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     cost = error_functions.crossentropy_loss(labels, activated_results)
     self.minimal_cost_configuration = self.params
     self.minimal_cost_configuration['loss'] = cost
-    for i in range(max_iter):
+    for _ in range(max_iter):
       self.temperature = self.temperature * self.decay
       # Mutate weights and biases with certain probability
       new_state = {}
@@ -80,6 +80,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         activated_results = new_activated_results
         self.params.update(new_state)
       self.loss.append(cost)
+    return self.minimal_cost_configuration['cost']
 
     def test(self, inputs: np.ndarray, labels: np.ndarray):
       """Function used to test the final resolution of the neural network
