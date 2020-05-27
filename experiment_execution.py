@@ -17,11 +17,29 @@ PRIMES = [3,17,101,5003,70001,600011,1234577,98765441,198765433,1928765459,
           1729797287625437,11,1861,257,49297,849347,1849283,71849363,731849389,
           3731849309,13731849301,213731849351,1213731849359,7,8819]
 
-df = pd.DataFrame(columns = ['dataset','neural_network','training_loss', 'testing_loss', 'time', 'number_of_folds'])
+df = pd.DataFrame(columns = ['dataset','neural_network','training_loss',
+      'testing_loss', 'time', 'number_of_folds'])
 resource_lock = threading.Lock()
 
 def prepare_dataset(csvname:str, transform_list:typing.List[str],
     drop_list: typing.List[str] = [], labels_id:str = 'y'):
+  """Method that process the datasets and prepares them to be used in the
+  different neural networks
+
+  Arguments:
+      csvname {str} -- CSV path to be preprocessed
+      transform_list {typing.List[str]} -- List of labels of the dataframe to be
+      transformed.
+
+  Keyword Arguments:
+      drop_list {typing.List[str]} -- List of labels to be dropped of the
+      dataframe (default: {[]}).
+      labels_id {str} -- Label of the column of the dataframe to be selected
+      as labels od the neural network (default: {'y'}).
+
+  Returns:
+      inputs,labels -- Inputs and labels extracted of the dataframe.
+  """
   if not os.path.isfile(csvname):
     raise AttributeError("CSV path provided is not a file")
   df = pd.read_csv(csvname)
@@ -32,8 +50,7 @@ def prepare_dataset(csvname:str, transform_list:typing.List[str],
 
 
 def init_datasets():
-  """Method that process the datasets and prepares them to be used in the
-  different neural networks
+  """Method that loads the datasets in memory
 
   Returns:
       list,list -- Label list and inputs list
