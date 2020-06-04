@@ -13,12 +13,18 @@ import time
 import threading
 
 PRIMES = [3,17,101,5003,70001,600011,1234577,98765441,198765433,1928765459,
-          19728765443,179728765483,1979728765451,12979728765461,129797287625459,
-          1729797287625437,11,1861,257,49297,849347,1849283,71849363,731849389,
-          3731849309,13731849301,213731849351,1213731849359,7,8819]
+          11,1861,257,49297,849347,1849283,71849363,731849389,26591,40879,
+          3731849309,7,88191,17191,27791,12347,53819,51341,99089,37643]
 
 df = pd.DataFrame(columns = ['dataset','neural_network','training_loss',
       'testing_loss', 'time', 'number_of_folds'])
+ga_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
+      'median_fitness', 'min_fitness'])
+sa_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
+      'median_fitness', 'min_fitness'])
+es_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
+      'median_fitness', 'min_fitness'])
+
 resource_lock = threading.Lock()
 
 def prepare_dataset(csvname:str, transform_list:typing.List[str],
@@ -100,7 +106,7 @@ def basic_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
-      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 
@@ -109,12 +115,16 @@ def genetic_nn_tenant():
   """
   nnet = GeneticNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
-  loss = nnet.train(tr_data, tr_labels, num_epochs)
+  loss, ga_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
-      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
+  ga_statistics['seed'] = r
+  ga_statistics['dataset'] = datasets[i]
+  global ga_df
+  ga_df = ga_df.append(ga_statistics, ignore_index=True)
 
 
 def strategy_nn_tenant():
@@ -122,12 +132,16 @@ def strategy_nn_tenant():
   """
   nnet = StrategyNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1], verbose=False)
   init_t = time.time()
-  loss = nnet.train(tr_data, tr_labels, num_epochs)
+  loss, es_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
-      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
+  es_statistics['seed'] = r
+  es_statistics['dataset'] = datasets[i]
+  global es_df
+  es_df = es_df.append(es_statistics, ignore_index=True)
 
 
 def random_nn_tenant():
@@ -139,7 +153,7 @@ def random_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
-      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 def annealed_nn_tenant():
@@ -147,21 +161,27 @@ def annealed_nn_tenant():
   """
   nnet = AnnealedNeuralNetwork([tr_data.shape[1], 10, 1], 1, tr_data.shape[1])
   init_t = time.time()
-  loss = nnet.train(tr_data, tr_labels, num_epochs)
+  loss, sa_statistics= nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'AnnealedNN',
-      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': 1}
+      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
+  sa_statistics['seed'] = r
+  sa_statistics['dataset'] = datasets[i]
+  global sa_df
+  sa_df = sa_df.append(sa_statistics, ignore_index=True)
 
 if __name__ == "__main__":
-  number_of_folds = 10
+  
+  number_of_folds = 5
   num_epochs = 5
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
   for r in PRIMES:
     np.random.seed = r
+    breakpoint()
     for i in range(len(labels_list)):
       labels = labels_list[i]
       inputs = inputs_list[i]
@@ -172,31 +192,37 @@ if __name__ == "__main__":
       for training,testing in tr_gen:
         tr.append(training)
         te.append(testing)
-      random_selection = np.random.randint(0,number_of_folds)
-      tr_idx, te_idx = (tr[random_selection],te[random_selection])
-      tr_data = inputs[tr_idx]
-      tr_labels = labels[tr_idx]
-      te_data = inputs[te_idx]
-      te_labels = labels[te_idx]
-      t1 = threading.Thread(target=basic_nn_tenant)
-      t2 = threading.Thread(target=genetic_nn_tenant)
-      t3 = threading.Thread(target=strategy_nn_tenant)
-      t4 = threading.Thread(target=random_nn_tenant)
-      t5 = threading.Thread(target=annealed_nn_tenant)
-      t1.daemon = True
-      t2.daemon = True
-      t3.daemon = True
-      t4.daemon = True
-      t5.daemon = True
-      t1.start()
-      t2.start()
-      t3.start()
-      t4.start()
-      t5.start()
-      t1.join()
-      t2.join()
-      t3.join()
-      t4.join()
-      t5.join()
-      print(df)
-  breakpoint()
+        # idx = np.random.randint(0,number_of_folds)
+      for idx in range(len(tr)):
+        print(idx)
+        tr_idx, te_idx = (tr[idx],te[idx])
+        tr_data = inputs[tr_idx]
+        tr_labels = labels[tr_idx]
+        te_data = inputs[te_idx]
+        te_labels = labels[te_idx]
+        t1 = threading.Thread(target=basic_nn_tenant)
+        t2 = threading.Thread(target=genetic_nn_tenant)
+        t3 = threading.Thread(target=strategy_nn_tenant)
+        t4 = threading.Thread(target=random_nn_tenant)
+        t5 = threading.Thread(target=annealed_nn_tenant)
+        t1.daemon = True
+        t2.daemon = True
+        t3.daemon = True
+        t4.daemon = True
+        t5.daemon = True
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t5.start()
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+        t5.join()
+        print(df)
+  df.to_csv("results{}.csv".format(str(num_epochs)), index=False)
+  ga_df.to_csv("ga{}.csv".format(str(num_epochs)), index=False)
+  es_df.to_csv("es{}.csv".format(str(num_epochs)), index=False)
+  sa_df.to_csv("sa{}.csv".format(str(num_epochs)), index=False)
+  

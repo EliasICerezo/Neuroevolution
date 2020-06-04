@@ -2,6 +2,7 @@ from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 import neuroevolution.activation_functions as activation_funtions
 import neuroevolution.operators.mutation as mutation
 import neuroevolution.error_functions as error_functions
+import pandas as pd
 import numpy as np
 
 MUTATION_PROBABILITY = 40
@@ -26,6 +27,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         in the training structure (default: {None})
     """
     self.layers = layers
+    self.statistics = pd.DataFrame(columns=['epoch', 'fitness'])
     if decay > 1:
       raise AttributeError("Decay can't be over 1")
     self.decay = 1 - decay
@@ -60,8 +62,8 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     activated_results = self.feed_forward(inputs)
     cost = error_functions.crossentropy_loss(labels, activated_results)
     self.minimal_cost_configuration = self.params
-    self.minimal_cost_configuration['loss'] = cost
-    for _ in range(max_iter):
+    self.minimal_cost_configuration['cost'] = cost
+    for i in range(max_iter):
       self.temperature = self.temperature * self.decay
       # Mutate weights and biases with certain probability
       new_state = {}
@@ -80,21 +82,27 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         activated_results = new_activated_results
         self.params.update(new_state)
       self.loss.append(cost)
-    return self.minimal_cost_configuration['cost']
+      self.__extract_statistics(i)
+    return (self.minimal_cost_configuration['cost'], self.statistics)
+    
+  def __extract_statistics(self, epoch: int):
+    result = {'epoch': int(epoch), 'fitness': abs(self.loss[-1])}
+    self.statistics = self.statistics.append(result, ignore_index=True)
 
-    def test(self, inputs: np.ndarray, labels: np.ndarray):
-      """Function used to test the final resolution of the neural network
 
-      Arguments:
-          inputs {np.ndarray} -- Inputs for the algorithm
-          labels {np.ndarray} -- Labels for the inputs
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
 
-      Returns:
-          loss -- loss of the data passed into it
-      """
-      activated_results = self.feed_forward(inputs)
-      cost = error_functions.crossentropy_loss(labels, activated_results)
-      return cost
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    activated_results = self.feed_forward(inputs)
+    cost = error_functions.crossentropy_loss(labels, activated_results)
+    return cost
 
   def random_mutation(self, values:np.ndarray):
     """Function that privides a random mutation in the weights or biases.

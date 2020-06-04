@@ -4,6 +4,7 @@ from neuroevolution.error_functions import crossentropy_loss
 from neuroevolution.operators.crossover import single_point_crossover 
 import neuroevolution.operators.selection as selection_operators
 import neuroevolution.operators.mutation as mutations
+import pandas as pd
 import numpy as np
 import inspect
 import random
@@ -20,7 +21,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
   It is evolved via a genetic algorithm
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 10, max_pop_size = 100, 
+               activation_functs = None, pop_size = 100, max_pop_size = 100, 
                verbose = True):
     """Constructor of the Genetic Neural Network
     
@@ -42,6 +43,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         AttributeError: If any of the given arguments does not agree with the 
         conventions
     """
+    self.statistics = pd.DataFrame(columns=['epoch','max_fitness',
+      'median_fitness', 'min_fitness'])
     self.verbose = verbose
     self.layers = layers
     self.population = {}
@@ -118,8 +121,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.calculate_loss(activated_results, targets)
       
       # Selection operator
-      if (
-          len(self.population.keys()) >
+      if (len(self.population.keys()) >
           self.max_pop_size or np.random.randint(0,101) <
           SELECTION_PROBABILITY):
         self.population = selection_operators.selection(
@@ -133,10 +135,27 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.population.update(self.additions)
       self.additions = {}
       self.sort_population()
+      self.__extract_statistics(i)
       if self.verbose:
         if i % 50 == 0:
           print("Epochs: {}".format(i))
-    return self.population[list(self.population.keys())[0]]['loss']
+    return (self.population[list(self.population.keys())[0]]['loss'], self.statistics)
+  
+  def __extract_statistics(self, epoch: int):
+    result = {'epoch': int(epoch),
+        'min_fitness': abs(self.population[list(self.population.keys())[0]]['loss']),
+        'max_fitness': abs(self.population[list(self.population.keys())[-1]]['loss']),
+        'median_fitness': abs(self.__calculate_median())}
+    self.statistics = self.statistics.append(result, ignore_index=True)
+
+  def __calculate_median(self):
+    median_idx = len(list(self.population.keys())) // 2
+    if len(list(self.population.keys())) % 2 == 0:
+      median = (abs(self.population[list(self.population.keys())[median_idx]]['loss']) +
+      abs(self.population[list(self.population.keys())[median_idx+1]]['loss'])) / 2
+    else:
+      median = self.population[list(self.population.keys())[median_idx+1]]['loss']
+    return median
 
   def test(self, inputs: np.ndarray, labels: np.ndarray):
     """Function used to test the final resolution of the neural network
