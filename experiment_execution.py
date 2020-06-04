@@ -20,10 +20,8 @@ df = pd.DataFrame(columns = ['dataset','neural_network','training_loss',
       'testing_loss', 'time', 'number_of_folds'])
 ga_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
       'median_fitness', 'min_fitness'])
-sa_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
-      'median_fitness', 'min_fitness'])
-es_df = pd.DataFrame(columns = ['dataset','seed','epoch','max_fitness',
-      'median_fitness', 'min_fitness'])
+sa_df = pd.DataFrame(columns = ['dataset','seed','epoch','fitness'])
+es_df = pd.DataFrame(columns = ['dataset','seed','epoch','fitness'])
 
 resource_lock = threading.Lock()
 
@@ -106,7 +104,7 @@ def basic_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
-      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 
@@ -119,7 +117,7 @@ def genetic_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
-      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   ga_statistics['seed'] = r
   ga_statistics['dataset'] = datasets[i]
@@ -136,7 +134,7 @@ def strategy_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
-      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   es_statistics['seed'] = r
   es_statistics['dataset'] = datasets[i]
@@ -153,7 +151,7 @@ def random_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
-      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 def annealed_nn_tenant():
@@ -165,7 +163,7 @@ def annealed_nn_tenant():
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'AnnealedNN',
-      'training_loss':loss, 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   sa_statistics['seed'] = r
   sa_statistics['dataset'] = datasets[i]
@@ -175,13 +173,13 @@ def annealed_nn_tenant():
 if __name__ == "__main__":
   
   number_of_folds = 5
-  num_epochs = 5
+  num_epochs = 10
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
   for r in PRIMES:
     np.random.seed = r
-    breakpoint()
+
     for i in range(len(labels_list)):
       labels = labels_list[i]
       inputs = inputs_list[i]
@@ -221,8 +219,8 @@ if __name__ == "__main__":
         t4.join()
         t5.join()
         print(df)
-  df.to_csv("results{}.csv".format(str(num_epochs)), index=False)
-  ga_df.to_csv("ga{}.csv".format(str(num_epochs)), index=False)
-  es_df.to_csv("es{}.csv".format(str(num_epochs)), index=False)
-  sa_df.to_csv("sa{}.csv".format(str(num_epochs)), index=False)
+    df.to_csv("results{}.csv".format(str(num_epochs)), index=False)
+    ga_df.to_csv("ga{}.csv".format(str(num_epochs)), index=False)
+    es_df.to_csv("es{}.csv".format(str(num_epochs)), index=False)
+    sa_df.to_csv("sa{}.csv".format(str(num_epochs)), index=False)
   
