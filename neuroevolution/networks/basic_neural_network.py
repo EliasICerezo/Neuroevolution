@@ -55,7 +55,6 @@ class BasicNeuralNetwork:
     Returns:
         [type] -- [description]
     """
-    np.random.seed = 42
     initialization = {}
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:

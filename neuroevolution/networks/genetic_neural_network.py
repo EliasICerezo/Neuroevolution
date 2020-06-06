@@ -1,7 +1,7 @@
 from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.error_functions import crossentropy_loss
-from neuroevolution.operators.crossover import single_point_crossover 
+import neuroevolution.operators.crossover as crossover_operators 
 import neuroevolution.operators.selection as selection_operators
 import neuroevolution.operators.mutation as mutations
 import pandas as pd
@@ -247,12 +247,16 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         p2_copy = copy.deepcopy(self.population[p2])
         w_1 = self.population[p1]['{}{}'.format(key,i+1)]
         w_2 = self.population[p2]['{}{}'.format(key,i+1)]
-        new_elements = single_point_crossover(w_1, w_2)
+        co_operators = inspect.getmembers(crossover_operators, inspect.isfunction)
+        operation = random.choice(co_operators)
+        # At this moment, operation is a tuple where the second elem is the 
+        # operation itself
+        operation = operation[1]
+        new_elements = operation(w_1, w_2)
         p1_copy['{}{}'.format(key,i+1)] = new_elements[0]
         p2_copy['{}{}'.format(key,i+1)] = new_elements[1]
         self.new_individual(p1_copy)
         self.new_individual(p2_copy)
-
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether
