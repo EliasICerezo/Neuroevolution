@@ -220,9 +220,9 @@ if __name__ == "__main__":
         t4.join()
         t5.join()
         print(df)
-    df.to_csv("results{}(5-2-1).csv".format(str(num_epochs)), index=False)
-    ga_df.to_csv("ga{}(5-2-1).csv".format(str(num_epochs)), index=False)
-    es_df.to_csv("es{}(5-2-1).csv".format(str(num_epochs)), index=False)
-    sa_df.to_csv("sa{}(5-2-1).csv".format(str(num_epochs)), index=False)
+    df.to_csv("results{}(5).csv".format(str(num_epochs)), index=False)
+    ga_df.to_csv("ga{}(5).csv".format(str(num_epochs)), index=False)
+    es_df.to_csv("es{}(5).csv".format(str(num_epochs)), index=False)
+    sa_df.to_csv("sa{}(5).csv".format(str(num_epochs)), index=False)
   
 
