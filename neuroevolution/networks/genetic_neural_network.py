@@ -143,16 +143,16 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
   
   def __extract_statistics(self, epoch: int):
     result = {'epoch': int(epoch),
-        'min_fitness': abs(self.population[list(self.population.keys())[0]]['loss']),
-        'max_fitness': abs(self.population[list(self.population.keys())[-1]]['loss']),
-        'median_fitness': abs(self.__calculate_median())}
+        'min_fitness': self.population[list(self.population.keys())[0]]['loss'],
+        'max_fitness': self.population[list(self.population.keys())[-1]]['loss'],
+        'median_fitness': self.__calculate_median()}
     self.statistics = self.statistics.append(result, ignore_index=True)
 
   def __calculate_median(self):
     median_idx = len(list(self.population.keys())) // 2
     if len(list(self.population.keys())) % 2 == 0:
-      median = (abs(self.population[list(self.population.keys())[median_idx]]['loss']) +
-      abs(self.population[list(self.population.keys())[median_idx+1]]['loss'])) / 2
+      median = (self.population[list(self.population.keys())[median_idx]]['loss'] +
+      self.population[list(self.population.keys())[median_idx+1]]['loss']) / 2
     else:
       median = self.population[list(self.population.keys())[median_idx+1]]['loss']
     return median

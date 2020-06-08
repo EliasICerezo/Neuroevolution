@@ -83,7 +83,7 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
 
   def __extract_statistics(self, epoch: int):
     result = {'epoch': int(epoch),
-        'fitness': abs(self.population[list(self.population.keys())[0]]['loss'])}
+        'fitness': self.population[list(self.population.keys())[0]]['loss']}
     self.statistics = self.statistics.append(result, ignore_index=True)
 
   def test(self, inputs: np.ndarray, labels: np.ndarray):

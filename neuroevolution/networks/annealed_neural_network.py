@@ -86,7 +86,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     return (self.minimal_cost_configuration['cost'], self.statistics)
     
   def __extract_statistics(self, epoch: int):
-    result = {'epoch': int(epoch), 'fitness': abs(self.loss[-1])}
+    result = {'epoch': int(epoch), 'fitness': self.loss[-1]}
     self.statistics = self.statistics.append(result, ignore_index=True)
 
 

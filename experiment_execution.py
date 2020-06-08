@@ -4,6 +4,7 @@ from neuroevolution.networks.annealed_neural_network import AnnealedNeuralNetwor
 from neuroevolution.networks.strategy_neural_network import StrategyNeuralNetwork
 from neuroevolution.networks.random_search_nn import RandomSearchNeuralNetwork
 from sklearn.model_selection import KFold
+from keras.utils import to_categorical
 import dataset_manipulation.helpers as helpers
 import typing
 import pandas as pd
@@ -98,26 +99,26 @@ def save_into_df(n_row:dict):
 def basic_nn_tenant():
   """Basic Neural Network tenant to be executed concurrently
   """
-  nnet = BasicNeuralNetwork([tr_data.shape[1], 5, 2, 1], 1, tr_data.shape[1])
+  nnet = BasicNeuralNetwork([tr_data.shape[1], 5, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'BasicNN',
-      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 
 def genetic_nn_tenant():
   """Genetic Neural Network tenant to be executed concurrently
   """
-  nnet = GeneticNeuralNetwork([tr_data.shape[1], 5, 2, 1], 1, tr_data.shape[1])
+  nnet = GeneticNeuralNetwork([tr_data.shape[1], 5, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss, ga_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'GeneticNN',
-      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   ga_statistics['seed'] = r
   ga_statistics['dataset'] = datasets[i]
@@ -128,13 +129,13 @@ def genetic_nn_tenant():
 def strategy_nn_tenant():
   """Strategy Neural Network tenant to be executed concurrently
   """
-  nnet = StrategyNeuralNetwork([tr_data.shape[1], 5, 2, 1], 1, tr_data.shape[1], verbose=False)
+  nnet = StrategyNeuralNetwork([tr_data.shape[1], 5, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1], verbose=False)
   init_t = time.time()
   loss, es_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'StrategyNN',
-      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   es_statistics['seed'] = r
   es_statistics['dataset'] = datasets[i]
@@ -145,25 +146,25 @@ def strategy_nn_tenant():
 def random_nn_tenant():
   """Random Neural Network tenant to be executed concurrently
   """
-  nnet = RandomSearchNeuralNetwork([tr_data.shape[1], 5, 2, 1], 1, tr_data.shape[1])
+  nnet = RandomSearchNeuralNetwork([tr_data.shape[1], 5, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'RandomNN',
-      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
 
 def annealed_nn_tenant():
   """Simulated Annealing Neural Network tenant to be executed concurrently
   """
-  nnet = AnnealedNeuralNetwork([tr_data.shape[1], 5, 2, 1], 1, tr_data.shape[1])
+  nnet = AnnealedNeuralNetwork([tr_data.shape[1], 5, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss, sa_statistics= nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
   te_loss = nnet.test(te_data, te_labels)
   n_row = {'dataset': datasets[i], 'neural_network':'AnnealedNN',
-      'training_loss':abs(loss), 'testing_loss':abs(te_loss), 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
+      'training_loss':loss, 'testing_loss':te_loss, 'time':t, 'number_of_folds': number_of_folds, 'epochs': num_epochs, 'fold': idx}
   save_into_df(n_row)
   sa_statistics['seed'] = r
   sa_statistics['dataset'] = datasets[i]
@@ -181,7 +182,7 @@ if __name__ == "__main__":
     np.random.seed = r
 
     for i in range(len(labels_list)):
-      labels = labels_list[i]
+      labels = to_categorical(labels_list[i])
       inputs = inputs_list[i]
       kf = KFold(number_of_folds,shuffle=True, random_state=r)
       tr_gen = kf.split(inputs,labels)
