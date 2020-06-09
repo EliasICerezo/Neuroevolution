@@ -174,7 +174,7 @@ def annealed_nn_tenant():
 if __name__ == "__main__":
   
   number_of_folds = 5
-  num_epochs = 5
+  num_epochs = 10
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
