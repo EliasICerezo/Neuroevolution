@@ -4,13 +4,14 @@ import neuroevolution.operators.mutation as mutation
 import neuroevolution.error_functions as error_functions
 import pandas as pd
 import numpy as np
-
+import random
+import inspect
 MUTATION_PROBABILITY = 40
 
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
   def __init__(self, layers: list, num_of_classes: int, input_size: int,
-               temperature = 100, decay = 0.1, boltzmann_constant = 10, activation_functs = None):
+               temperature = 25, decay = 0.2, boltzmann_constant = 50, activation_functs = None):
     """Constructor of the simulated annealing-optimized neural network.
     
     Arguments:
@@ -27,6 +28,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         in the training structure (default: {None})
     """
     self.layers = layers
+    breakpoint()
     self.statistics = pd.DataFrame(columns=['epoch', 'fitness'])
     if decay > 1:
       raise AttributeError("Decay can't be over 1")
@@ -74,13 +76,16 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
             self.params['b{}'.format(j+1)])
       new_activated_results = self.calculate_feed_forward(inputs,new_state)
       new_cost = error_functions.crossentropy_loss(labels, new_activated_results)
-      if new_cost < cost:
-        self.minimal_cost_configuration = new_state
-        self.minimal_cost_configuration['cost'] = new_cost
       if self.accept_result(cost, new_cost, self.temperature):
         cost = new_cost
         activated_results = new_activated_results
         self.params.update(new_state)
+      elif cost < self.minimal_cost_configuration['cost'] :
+        # breakpoint()
+        self.minimal_cost_configuration = new_state
+        self.minimal_cost_configuration['cost'] = new_cost
+      if i == max_iter-1:
+        cost = min(self.loss)
       self.loss.append(cost)
       self.__extract_statistics(i)
     return (self.minimal_cost_configuration['cost'], self.statistics)
@@ -113,8 +118,15 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     Returns:
         np.ndarray -- Te weights or biases array mutated
     """ 
-    if np.random.randint(0,100) < MUTATION_PROBABILITY:
-      values = mutation.add_a_weighted_random_value(values, np.random.uniform(0,1))
+    for i,_ in enumerate(values.flatten()):
+      if np.random.randint(0,100) < MUTATION_PROBABILITY:
+        m_operators = inspect.getmembers(mutation, inspect.isfunction)
+        operation = random.choice(m_operators)
+        while operation[0] == 'generate_rand_value':
+          m_operators = inspect.getmembers(mutation, inspect.isfunction)
+          operation = random.choice(m_operators)
+        operation = operation[1]
+        values = operation(values)
     return values
 
   def accept_result(self, cost, new_cost, temperature):
@@ -136,8 +148,9 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         return True
     else:
         cost_increment = new_cost - cost
-        r = np.random.rand()
-        if r > np.exp(
+        response = np.random.rand()
+        # breakpoint()
+        if response > np.exp(
               ((-cost_increment)/self.boltzmann_constant*self.temperature)):
                 return True
         else:

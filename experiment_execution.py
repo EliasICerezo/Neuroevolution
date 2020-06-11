@@ -99,7 +99,7 @@ def save_into_df(n_row:dict):
 def basic_nn_tenant():
   """Basic Neural Network tenant to be executed concurrently
   """
-  nnet = BasicNeuralNetwork([tr_data.shape[1], 10, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
+  nnet = BasicNeuralNetwork([tr_data.shape[1], neurons_hidden_layer, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
@@ -112,7 +112,7 @@ def basic_nn_tenant():
 def genetic_nn_tenant():
   """Genetic Neural Network tenant to be executed concurrently
   """
-  nnet = GeneticNeuralNetwork([tr_data.shape[1], 10, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
+  nnet = GeneticNeuralNetwork([tr_data.shape[1], neurons_hidden_layer, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss, ga_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
@@ -129,7 +129,7 @@ def genetic_nn_tenant():
 def strategy_nn_tenant():
   """Strategy Neural Network tenant to be executed concurrently
   """
-  nnet = StrategyNeuralNetwork([tr_data.shape[1], 10, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1], verbose=False)
+  nnet = StrategyNeuralNetwork([tr_data.shape[1], neurons_hidden_layer, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1], verbose=False)
   init_t = time.time()
   loss, es_statistics = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
@@ -146,7 +146,7 @@ def strategy_nn_tenant():
 def random_nn_tenant():
   """Random Neural Network tenant to be executed concurrently
   """
-  nnet = RandomSearchNeuralNetwork([tr_data.shape[1], 10, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
+  nnet = RandomSearchNeuralNetwork([tr_data.shape[1], neurons_hidden_layer, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss = nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
@@ -158,7 +158,7 @@ def random_nn_tenant():
 def annealed_nn_tenant():
   """Simulated Annealing Neural Network tenant to be executed concurrently
   """
-  nnet = AnnealedNeuralNetwork([tr_data.shape[1], 10, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
+  nnet = AnnealedNeuralNetwork([tr_data.shape[1], neurons_hidden_layer, tr_labels.shape[1]], tr_labels.shape[1], tr_data.shape[1])
   init_t = time.time()
   loss, sa_statistics= nnet.train(tr_data, tr_labels, num_epochs)
   t = time.time() - init_t
@@ -175,6 +175,7 @@ if __name__ == "__main__":
   
   number_of_folds = 5
   num_epochs = 10
+  neurons_hidden_layer = 10
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
@@ -220,9 +221,9 @@ if __name__ == "__main__":
         t4.join()
         t5.join()
         print(df)
-    df.to_csv("results{}(10).csv".format(str(num_epochs)), index=False)
-    ga_df.to_csv("ga{}(10).csv".format(str(num_epochs)), index=False)
-    es_df.to_csv("es{}(10).csv".format(str(num_epochs)), index=False)
-    sa_df.to_csv("sa{}(10).csv".format(str(num_epochs)), index=False)
+    df.to_csv("experiment4.csv", index=False)
+    ga_df.to_csv("ga_experiment4.csv", index=False)
+    es_df.to_csv("es_experiment4.csv", index=False)
+    sa_df.to_csv("sa_experiment4.csv", index=False)
   
 
