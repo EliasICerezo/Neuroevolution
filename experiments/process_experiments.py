@@ -4,7 +4,7 @@ import os
 
 if __name__ == "__main__":
   processed_df = pd.DataFrame(columns=['nnet', 'dataset', 'tr_mean', 'tr_std', 'te_mean', 'te_std', 'mean_time', 'std_time'])
-  csv_path = "Experiment2/experiment2.csv" #input("Results CSV to be processed: ")
+  csv_path = "Experiment3/experiment3.csv" #input("Results CSV to be processed: ")
   if csv_path == "":
     raise AttributeError("Path to file provided empty")
   df = pd.read_csv(csv_path)
