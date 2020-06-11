@@ -55,22 +55,29 @@ if __name__ == "__main__":
     for selected_dataset in unique_datasets:
       is_sa_dataset = sa_df['dataset'] == selected_dataset
       is_es_dataset = es_df['dataset'] == selected_dataset
+      is_ga_dataset = ga_df['dataset'] == selected_dataset
       dataset_sa_df = sa_df[is_sa_dataset]
       dataset_es_df = es_df[is_es_dataset]
+      dataset_ga_df = ga_df[is_ga_dataset]
       sa_list = []
       es_list = []
+      ga_list = []
       for selected_epoch in unique_epochs:
         is_sa_epoch = dataset_sa_df['epoch'] == selected_epoch
         is_es_epoch = dataset_es_df['epoch'] == selected_epoch
+        is_ga_epoch = dataset_ga_df['epoch'] == selected_epoch
         epoch_sa_df = dataset_sa_df[is_sa_epoch]
         epoch_es_df = dataset_es_df[is_es_epoch]
+        epoch_ga_df = dataset_ga_df[is_ga_epoch]
         sa_fitness = epoch_sa_df['fitness'].to_list()
         es_fitness = epoch_es_df['fitness'].to_list()
+        ga_fitness = epoch_ga_df['min_fitness'].to_list()
         sa_list.append(statistics.mean(sa_fitness))
         es_list.append(statistics.mean(es_fitness))
+        ga_list.append(statistics.mean(ga_fitness))
       plt.plot(x,sa_list, label="Simulated Annealing Fitness")
       plt.plot(x,es_list, label="Evolutionary Strategy Fitness")
-      plt.plot(x,min_fitness_list, label="Genetic Algorithm Fitness")
+      plt.plot(x,ga_list, label="Genetic Algorithm Fitness")
       plt.xlabel('Epochs')
       plt.ylabel('Fitness')
       plt.title('Fitness for {} {}'.format(directory, selected_dataset))
