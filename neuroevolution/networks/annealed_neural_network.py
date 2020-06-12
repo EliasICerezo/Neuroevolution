@@ -28,7 +28,6 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         in the training structure (default: {None})
     """
     self.layers = layers
-    breakpoint()
     self.statistics = pd.DataFrame(columns=['epoch', 'fitness'])
     if decay > 1:
       raise AttributeError("Decay can't be over 1")

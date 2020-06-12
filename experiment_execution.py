@@ -175,7 +175,7 @@ if __name__ == "__main__":
   
   number_of_folds = 5
   num_epochs = 10
-  neurons_hidden_layer = 10
+  neurons_hidden_layer = 5
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
@@ -221,9 +221,9 @@ if __name__ == "__main__":
         t4.join()
         t5.join()
         print(df)
-    df.to_csv("experiment4.csv", index=False)
-    ga_df.to_csv("ga_experiment4.csv", index=False)
-    es_df.to_csv("es_experiment4.csv", index=False)
-    sa_df.to_csv("sa_experiment4.csv", index=False)
+    df.to_csv("experiment2.csv", index=False)
+    ga_df.to_csv("ga_experiment2.csv", index=False)
+    es_df.to_csv("es_experiment2.csv", index=False)
+    sa_df.to_csv("sa_experiment2.csv", index=False)
   
 
