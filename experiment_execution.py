@@ -174,8 +174,8 @@ def annealed_nn_tenant():
 if __name__ == "__main__":
   
   number_of_folds = 5
-  num_epochs = 5
-  neurons_hidden_layer = 5
+  num_epochs = 10
+  neurons_hidden_layer = 10
   labels_list, inputs_list = init_datasets()
   datasets = ['iris', 'wine', 'breast_cancer', 'heart']
   dfidx = 0
@@ -200,30 +200,30 @@ if __name__ == "__main__":
         tr_labels = labels[tr_idx]
         te_data = inputs[te_idx]
         te_labels = labels[te_idx]
-        t1 = threading.Thread(target=basic_nn_tenant)
-        t2 = threading.Thread(target=genetic_nn_tenant)
-        t3 = threading.Thread(target=strategy_nn_tenant)
-        t4 = threading.Thread(target=random_nn_tenant)
+        # t1 = threading.Thread(target=basic_nn_tenant)
+        # t2 = threading.Thread(target=genetic_nn_tenant)
+        # t3 = threading.Thread(target=strategy_nn_tenant)
+        # t4 = threading.Thread(target=random_nn_tenant)
         t5 = threading.Thread(target=annealed_nn_tenant)
-        t1.daemon = True
-        t2.daemon = True
-        t3.daemon = True
-        t4.daemon = True
+        # t1.daemon = True
+        # t2.daemon = True
+        # t3.daemon = True
+        # t4.daemon = True
         t5.daemon = True
-        t1.start()
-        t2.start()
-        t3.start()
-        t4.start()
+        # t1.start()
+        # t2.start()
+        # t3.start()
+        # t4.start()
         t5.start()
-        t1.join()
-        t2.join()
-        t3.join()
-        t4.join()
+        # t1.join()
+        # t2.join()
+        # t3.join()
+        # t4.join()
         t5.join()
         print(df)
-    df.to_csv("experiment1.csv", index=False)
-    ga_df.to_csv("ga_experiment1.csv", index=False)
-    es_df.to_csv("es_experiment1.csv", index=False)
-    sa_df.to_csv("sa_experiment1.csv", index=False)
+    df.to_csv("experiment4.csv", index=False)
+    # ga_df.to_csv("ga_experiment4.csv", index=False)
+    # es_df.to_csv("es_experiment4.csv", index=False)
+    sa_df.to_csv("sa_experiment4.csv", index=False)
   
 

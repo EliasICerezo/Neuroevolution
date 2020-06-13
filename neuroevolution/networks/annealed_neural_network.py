@@ -11,7 +11,7 @@ MUTATION_PROBABILITY = 40
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
   def __init__(self, layers: list, num_of_classes: int, input_size: int,
-               temperature = 25, decay = 0.2, boltzmann_constant = 50, activation_functs = None):
+               temperature = 5, decay = 0.2, boltzmann_constant = 50, activation_functs = None):
     """Constructor of the simulated annealing-optimized neural network.
     
     Arguments:
@@ -37,7 +37,6 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     self.boltzmann_constant = boltzmann_constant
     self.temperature = temperature
     self.init_range = None
-    self.minimal_cost_configuration = {}
     if layers[-1] != num_of_classes:
       raise AttributeError("The number of classes should match the last layer")
     if layers[0] != input_size:
@@ -62,9 +61,9 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     """
     activated_results = self.feed_forward(inputs)
     cost = error_functions.crossentropy_loss(labels, activated_results)
-    self.minimal_cost_configuration = self.params
-    self.minimal_cost_configuration['cost'] = cost
     for i in range(max_iter):
+      if i!=0:
+        cost = self.loss[-1]
       self.temperature = self.temperature * self.decay
       # Mutate weights and biases with certain probability
       new_state = {}
@@ -79,15 +78,9 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         cost = new_cost
         activated_results = new_activated_results
         self.params.update(new_state)
-      elif cost < self.minimal_cost_configuration['cost'] :
-        # breakpoint()
-        self.minimal_cost_configuration = new_state
-        self.minimal_cost_configuration['cost'] = new_cost
-      if i == max_iter-1:
-        cost = min(self.loss)
       self.loss.append(cost)
       self.__extract_statistics(i)
-    return (self.minimal_cost_configuration['cost'], self.statistics)
+    return (cost, self.statistics)
     
   def __extract_statistics(self, epoch: int):
     result = {'epoch': int(epoch), 'fitness': self.loss[-1]}

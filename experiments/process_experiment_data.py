@@ -26,9 +26,9 @@ if __name__ == "__main__":
         'mean_time': statistics.mean(time), 'std_time': statistics.stdev(time)}
       processed_df = processed_df.append(row, ignore_index = True)
   processed_df = processed_df.round(decimals=4)
-  processed_df.to_csv("processed_experiments/processed_{}".format(os.path.split(csv_path)[-1]), index=False)
+  processed_df.to_csv(os.path.join("processed_experiments/{}/processed_{}".format(os.path.split(csv_path)[0],os.path.split(csv_path)[-1])), index=False)
   for dataset in unique_datasets:
     is_data_from_dataset = processed_df['dataset'] == dataset
     data_from_dataset = processed_df[is_data_from_dataset]
     data_from_dataset = data_from_dataset.drop(columns=['dataset'])
-    data_from_dataset.to_csv("{}table.csv".format(dataset), index=False)
+    data_from_dataset.to_csv(os.path.join('processed_experiments',os.path.split(csv_path)[0],"{}table.csv".format(dataset)), index=False)
