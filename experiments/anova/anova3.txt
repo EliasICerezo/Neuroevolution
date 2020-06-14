@@ -1,0 +1,35 @@
+Experiment3/experiment3.csv training | F: 233.10919262323483 | P: 1.8958984040808326e-174 | 
+
+           Multiple Comparison of Means - Tukey HSD, FWER=0.05            
+==========================================================================
+      group1            group2      meandiff p-adj   lower   upper  reject
+--------------------------------------------------------------------------
+   basic_training       es_training  -1.5322  0.001 -1.8074 -1.2569   True
+   basic_training       ga_training   -2.189  0.001 -2.4642 -1.9137   True
+   basic_training randomnn_training  -1.4445  0.001 -1.7198 -1.1693   True
+   basic_training       sa_training   0.3615 0.0032  0.0863  0.6367   True
+      es_training       ga_training  -0.6568  0.001  -0.932 -0.3816   True
+      es_training randomnn_training   0.0876    0.9 -0.1876  0.3628  False
+      es_training       sa_training   1.8937  0.001  1.6184  2.1689   True
+      ga_training randomnn_training   0.7444  0.001  0.4692  1.0196   True
+      ga_training       sa_training   2.5505  0.001  2.2752  2.8257   True
+randomnn_training       sa_training    1.806  0.001  1.5308  2.0813   True
+--------------------------------------------------------------------------
+
+Experiment3/experiment3.csv training | F: 873.205973047988 | P: 0.0 | 
+
+           Multiple Comparison of Means - Tukey HSD, FWER=0.05            
+==========================================================================
+     group1           group2      meandiff p-adj   lower    upper   reject
+--------------------------------------------------------------------------
+   basic_testing       es_testing -13.2253  0.001 -13.9878 -12.4628   True
+   basic_testing       ga_testing -13.9066  0.001 -14.6691 -13.1441   True
+   basic_testing randomnn_testing -13.1308  0.001 -13.8933 -12.3683   True
+   basic_testing       sa_testing  -9.0506  0.001  -9.8131  -8.2881   True
+      es_testing       ga_testing  -0.6813 0.1054  -1.4438   0.0812  False
+      es_testing randomnn_testing   0.0946    0.9  -0.6679   0.8571  False
+      es_testing       sa_testing   4.1747  0.001   3.4122   4.9372   True
+      ga_testing randomnn_testing   0.7759 0.0438   0.0134   1.5384   True
+      ga_testing       sa_testing    4.856  0.001   4.0935   5.6185   True
+randomnn_testing       sa_testing   4.0801  0.001   3.3176   4.8426   True
+--------------------------------------------------------------------------
