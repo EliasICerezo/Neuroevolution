@@ -1,5 +1,6 @@
 from neuroevolution.networks.genetic_neural_network import GeneticNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
+import pandas as pd
 import numpy as np
 import typing
 
@@ -9,9 +10,10 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
   ways.
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 50, sigma = 0.3, lr = 0.01,
+               activation_functs = None, pop_size = 50, sigma = 0.5, lr = 0.1,
                verbose:bool =True):       
     self.learning_rate = lr
+    self.statistics = pd.DataFrame(columns=['epoch', 'fitness'])
     self.sigma = sigma
     self.pop_size = pop_size
     self.layers = layers
@@ -50,7 +52,8 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
         AttributeError: If the array comes initialized with more than 1 solution
     """
     if len(self.population.keys()) != 1:
-      raise AttributeError("Can't have more than one solution in this state of the program")
+      raise AttributeError(
+        "Can't have more than one solution in this state of the program")
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results,targets)
     original_solution = self.population[list(self.population.keys())[0]]
@@ -72,9 +75,30 @@ class StrategyNeuralNetwork(GeneticNeuralNetwork):
       standard_losses = self.standarize_loss()
       self.update_weights(standard_losses,original_solution)
       self.additions = {}
+      self.__extract_statistics(i)
     self.population = {"final_solution": original_solution}
     activated_results = self.evolved_feed_forward(inputs)
     self.calculate_loss(activated_results,targets)
+    return (self.population['final_solution']['loss'], self.statistics)
+
+  def __extract_statistics(self, epoch: int):
+    result = {'epoch': int(epoch),
+        'fitness': self.population[list(self.population.keys())[0]]['loss']}
+    self.statistics = self.statistics.append(result, ignore_index=True)
+
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+      """Function used to test the final resolution of the neural network
+
+      Arguments:
+          inputs {np.ndarray} -- Inputs for the algorithm
+          labels {np.ndarray} -- Labels for the inputs
+
+      Returns:
+          loss -- loss of the data passed into it
+      """
+      activated_results = self.evolved_feed_forward(inputs)
+      self.calculate_loss(activated_results,labels)
+      return self.population['final_solution']['loss']
 
   def update_weights(self, standard_losses:np.array, original_solution:dict):
     """Method that updates the weights and biases in the original solution

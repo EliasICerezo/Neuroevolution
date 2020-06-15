@@ -69,8 +69,8 @@ def add_or_substract_a_random_value(weights:np.array):
   weights.put(index, (weights[index])*(random_value*add_or_sbstract))
   return weights
 
-def change_sign_of_a_weight(weights:np.array):
-  """Changes the sign of a weight
+def change_sign_of_a_weight_or_bias(weights:np.array):
+  """Changes the sign of a weight or bias
   
   Arguments:
       weights {np.array} -- weight array

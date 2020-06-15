@@ -1,9 +1,10 @@
 from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 from neuroevolution.activation_functions import sigmoid
 from neuroevolution.error_functions import crossentropy_loss
-from neuroevolution.operators.crossover import single_point_crossover 
+import neuroevolution.operators.crossover as crossover_operators 
 import neuroevolution.operators.selection as selection_operators
 import neuroevolution.operators.mutation as mutations
+import pandas as pd
 import numpy as np
 import inspect
 import random
@@ -20,7 +21,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
   It is evolved via a genetic algorithm
   """
   def __init__(self, layers:list, num_of_classes:int, input_size:int,
-               activation_functs = None, pop_size = 10, max_pop_size = 100, 
+               activation_functs = None, pop_size = 100, max_pop_size = 100, 
                verbose = True):
     """Constructor of the Genetic Neural Network
     
@@ -42,6 +43,8 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         AttributeError: If any of the given arguments does not agree with the 
         conventions
     """
+    self.statistics = pd.DataFrame(columns=['epoch','max_fitness',
+      'median_fitness', 'min_fitness'])
     self.verbose = verbose
     self.layers = layers
     self.population = {}
@@ -118,8 +121,7 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.calculate_loss(activated_results, targets)
       
       # Selection operator
-      if (
-          len(self.population.keys()) >
+      if (len(self.population.keys()) >
           self.max_pop_size or np.random.randint(0,101) <
           SELECTION_PROBABILITY):
         self.population = selection_operators.selection(
@@ -133,9 +135,47 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
       self.population.update(self.additions)
       self.additions = {}
       self.sort_population()
+      self.__extract_statistics(i)
       if self.verbose:
         if i % 50 == 0:
           print("Epochs: {}".format(i))
+    return (self.population[list(self.population.keys())[0]]['loss'], self.statistics)
+  
+  def __extract_statistics(self, epoch: int):
+    result = {'epoch': int(epoch),
+        'min_fitness': self.population[list(self.population.keys())[0]]['loss'],
+        'max_fitness': self.population[list(self.population.keys())[-1]]['loss'],
+        'median_fitness': self.__calculate_median()}
+    self.statistics = self.statistics.append(result, ignore_index=True)
+
+  def __calculate_median(self):
+    median_idx = len(list(self.population.keys())) // 2
+    if len(list(self.population.keys())) % 2 == 0:
+      median = (self.population[list(self.population.keys())[median_idx]]['loss'] +
+      self.population[list(self.population.keys())[median_idx+1]]['loss']) / 2
+    else:
+      median = self.population[list(self.population.keys())[median_idx+1]]['loss']
+    return median
+
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+      loss -- loss of the data passed into it
+    """
+    temp = self.population
+    self.population = {
+          'test_solution' : self.population[list(self.population.keys())[0]]}
+
+    activated_results = self.evolved_feed_forward(inputs)
+    self.calculate_loss(activated_results, labels)
+    loss = self.population[list(self.population.keys())[0]]['loss']
+    self.population = temp
+    return loss 
 
   def calculate_loss(self, activated_results: np.ndarray, targets: np.ndarray):
     """This function calculates the loss for the population of the network
@@ -165,13 +205,13 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
           elem = v_copy['W{}'.format(i+1)]
           elem = self.__mutation_operator(elem,sigma)
           v_copy['W{}'.format(i+1)] = elem
-          self.__new_individual(v_copy)
+          self.new_individual(v_copy)
         if np.random.randint(0,100) < MUTATION_PROBABILITY:
           v_copy = copy.deepcopy(v)
           elem = v_copy['b{}'.format(i+1)]
           elem = self.__mutation_operator(elem,sigma)
           v_copy['b{}'.format(i+1)] = elem
-          self.__new_individual(v_copy)
+          self.new_individual(v_copy)
 
   def sort_population(self):
     """Function that sorts the population over loss values ascending
@@ -207,12 +247,16 @@ class GeneticNeuralNetwork(BasicNeuralNetwork):
         p2_copy = copy.deepcopy(self.population[p2])
         w_1 = self.population[p1]['{}{}'.format(key,i+1)]
         w_2 = self.population[p2]['{}{}'.format(key,i+1)]
-        new_elements = single_point_crossover(w_1, w_2)
+        co_operators = inspect.getmembers(crossover_operators, inspect.isfunction)
+        operation = random.choice(co_operators)
+        # At this moment, operation is a tuple where the second elem is the 
+        # operation itself
+        operation = operation[1]
+        new_elements = operation(w_1, w_2)
         p1_copy['{}{}'.format(key,i+1)] = new_elements[0]
         p2_copy['{}{}'.format(key,i+1)] = new_elements[1]
-        self.__new_individual(p1_copy)
-        self.__new_individual(p2_copy)
-
+        self.new_individual(p1_copy)
+        self.new_individual(p2_copy)
   
   def __mutation_operator(self, elem:np.array, sigma: float = None):
     """A function that applies the mutation operator to the given element wether

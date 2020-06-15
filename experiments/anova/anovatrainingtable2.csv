@@ -1,0 +1,11 @@
+group1,group2,meandiff,p-adj,lower,upper,reject
+basic_training,es_training,-1.4475,0.001,-1.6696,-1.2254,True
+basic_training,ga_training,-1.7211,0.001,-1.9431,-1.499,True
+basic_training,randomnn_training,-1.1771,0.001,-1.3991,-0.955,True
+basic_training,sa_training,0.1052,0.6716,-0.1169,0.3273,False
+es_training,ga_training,-0.2736,0.007,-0.4957,-0.0515,True
+es_training,randomnn_training,0.2704,0.008,0.0483,0.4925,True
+es_training,sa_training,1.5527,0.001,1.3306,1.7748,True
+ga_training,randomnn_training,0.544,0.001,0.3219,0.7661,True
+ga_training,sa_training,1.8263,0.001,1.6042,2.0483,True
+randomnn_training,sa_training,1.2823,0.001,1.0602,1.5043,True

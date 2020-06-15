@@ -20,7 +20,7 @@ class BasicNeuralNetwork:
     """Contructor of the basic Neural Network Object
 
     Keyword arguments:
-      layers -- List of numbers that ensemble the number of neurons od each layer
+      layers -- Number's list that ensemble the number of neurons of each layer
       lr -- Stands for learning rate and it ts the size of the movement once you
       start training it.
     """ 
@@ -49,12 +49,12 @@ class BasicNeuralNetwork:
     are not uniformly distributed which can cause a slower convergence.
     
     Keyword Arguments:
-        store {dict} -- Dictionary to put the initialization if provided (default: {None})
+        store {dict} -- Dictionary to put the initialization if provided
+        (default: {None})
     
     Returns:
         [type] -- [description]
     """
-    np.random.seed = 42
     initialization = {}
     for i,e in enumerate(self.layers):
       if i < len(self.layers)-1:
@@ -80,13 +80,32 @@ class BasicNeuralNetwork:
       epochs -- number of iterations of optimization that the neural network
       will perform
     """  
+    # Testing if the labels need to be reshaped
+    try:
+      targets.shape[1]
+    except:
+      targets = targets.reshape(targets.shape[0],1)
     for _ in range(epochs):
       y_hat = self.feed_forward(inputs)
       loss = crossentropy_loss(targets,y_hat)
       self.loss.append(loss)
       self.backpropagation(inputs,y=targets,y_hat=y_hat)
       self.__weight_updating()
+      return self.loss[-1]
 
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    y_hat = self.feed_forward(inputs)
+    loss = crossentropy_loss(labels,y_hat)
+    return loss
 
   def feed_forward(self, inputs):
     """Function that performs the forward pass through the neural network, it
@@ -99,6 +118,7 @@ class BasicNeuralNetwork:
     return self.calculate_feed_forward(inputs,self.params)
   
   def calculate_feed_forward(self, inputs, store):
+    # breakpoint()
     for i in range(len(self.layers)-1):
         if i == 0:
           Z_i = inputs.dot(store['W{}'.format(i+1)]) + store['b{}'.format(i+1)]

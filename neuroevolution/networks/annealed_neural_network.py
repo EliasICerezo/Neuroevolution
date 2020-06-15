@@ -2,14 +2,16 @@ from neuroevolution.networks.basic_neural_network import BasicNeuralNetwork
 import neuroevolution.activation_functions as activation_funtions
 import neuroevolution.operators.mutation as mutation
 import neuroevolution.error_functions as error_functions
+import pandas as pd
 import numpy as np
-
+import random
+import inspect
 MUTATION_PROBABILITY = 40
 
 
 class AnnealedNeuralNetwork(BasicNeuralNetwork):
   def __init__(self, layers: list, num_of_classes: int, input_size: int,
-               temperature = 100, decay = 0.1, activation_functs = None):
+               temperature = 5, decay = 0.2, boltzmann_constant = 50, activation_functs = None):
     """Constructor of the simulated annealing-optimized neural network.
     
     Arguments:
@@ -26,10 +28,15 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         in the training structure (default: {None})
     """
     self.layers = layers
-    self.decay = decay
+    self.statistics = pd.DataFrame(columns=['epoch', 'fitness'])
+    if decay > 1:
+      raise AttributeError("Decay can't be over 1")
+    self.decay = 1 - decay
     self.params = {}
     self.loss = []
+    self.boltzmann_constant = boltzmann_constant
     self.temperature = temperature
+    self.init_range = None
     if layers[-1] != num_of_classes:
       raise AttributeError("The number of classes should match the last layer")
     if layers[0] != input_size:
@@ -38,7 +45,7 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
       raise AttributeError("Can't create a neural net without a single layer ")
     self.activation_functs = activation_functs
     if activation_functs is None:
-      self.activation_functs = [activation_functions.sigmoid for i in range(len(self.layers))]
+      self.activation_functs = [activation_funtions.sigmoid for i in range(len(self.layers))]
     self.initialize_weithts_and_biases(self.params)
   
   def train(self, inputs: np.ndarray, labels: np.ndarray, max_iter: int):
@@ -55,7 +62,9 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     activated_results = self.feed_forward(inputs)
     cost = error_functions.crossentropy_loss(labels, activated_results)
     for i in range(max_iter):
-      self.update_temperature(i/float(max_iter))
+      if i!=0:
+        cost = self.loss[-1]
+      self.temperature = self.temperature * self.decay
       # Mutate weights and biases with certain probability
       new_state = {}
       for j in range(len(self.layers)-1):
@@ -65,13 +74,32 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
             self.params['b{}'.format(j+1)])
       new_activated_results = self.calculate_feed_forward(inputs,new_state)
       new_cost = error_functions.crossentropy_loss(labels, new_activated_results)
-      if self.acceptance_probability(
-            cost, new_cost, self.temperature) > np.random.random():
+      if self.accept_result(cost, new_cost, self.temperature):
         cost = new_cost
         activated_results = new_activated_results
         self.params.update(new_state)
       self.loss.append(cost)
+      self.__extract_statistics(i)
+    return (cost, self.statistics)
+    
+  def __extract_statistics(self, epoch: int):
+    result = {'epoch': int(epoch), 'fitness': self.loss[-1]}
+    self.statistics = self.statistics.append(result, ignore_index=True)
 
+
+  def test(self, inputs: np.ndarray, labels: np.ndarray):
+    """Function used to test the final resolution of the neural network
+
+    Arguments:
+        inputs {np.ndarray} -- Inputs for the algorithm
+        labels {np.ndarray} -- Labels for the inputs
+
+    Returns:
+        loss -- loss of the data passed into it
+    """
+    activated_results = self.feed_forward(inputs)
+    cost = error_functions.crossentropy_loss(labels, activated_results)
+    return cost
 
   def random_mutation(self, values:np.ndarray):
     """Function that privides a random mutation in the weights or biases.
@@ -82,20 +110,18 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
     Returns:
         np.ndarray -- Te weights or biases array mutated
     """ 
-    if np.random.randint(0,100) < MUTATION_PROBABILITY:
-      values = mutation.add_a_weighted_random_value(values, np.random.uniform(0,1))
+    for i,_ in enumerate(values.flatten()):
+      if np.random.randint(0,100) < MUTATION_PROBABILITY:
+        m_operators = inspect.getmembers(mutation, inspect.isfunction)
+        operation = random.choice(m_operators)
+        while operation[0] == 'generate_rand_value':
+          m_operators = inspect.getmembers(mutation, inspect.isfunction)
+          operation = random.choice(m_operators)
+        operation = operation[1]
+        values = operation(values)
     return values
-  
-  def update_temperature(self, fraction):
-    """The function that updated the temperature each iteration of the loop
-    
-    Arguments:
-        fraction {float} -- The fraction that the temperature is going to be 
-        reduced
-    """
-    self.temperature = self.temperature - 1
 
-  def acceptance_probability(self, cost, new_cost, temperature):
+  def accept_result(self, cost, new_cost, temperature):
     """Function that calculates the acceptance probability of the provided 
     solution.
     
@@ -110,10 +136,14 @@ class AnnealedNeuralNetwork(BasicNeuralNetwork):
         v -- A value between 0 and 1 repressenting the probability of being
         accepted
     """
-    if new_cost < cost:
-        return 1
+    if new_cost <= cost:
+        return True
     else:
-        # This approach is not good at all and it gets trapped into local minima
-        # p = np.exp(- (new_cost - cost) / (temperature/ 100))
-        # return p
-        return 0
+        cost_increment = new_cost - cost
+        response = np.random.rand()
+        # breakpoint()
+        if response > np.exp(
+              ((-cost_increment)/self.boltzmann_constant*self.temperature)):
+                return True
+        else:
+          return False

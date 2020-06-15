@@ -1,0 +1,11 @@
+group1,group2,meandiff,p-adj,lower,upper,reject
+basic_testing,es_testing,-13.2253,0.001,-13.9878,-12.4628,True
+basic_testing,ga_testing,-13.9066,0.001,-14.6691,-13.1441,True
+basic_testing,randomnn_testing,-13.1308,0.001,-13.8933,-12.3683,True
+basic_testing,sa_testing,-9.0506,0.001,-9.8131,-8.2881,True
+es_testing,ga_testing,-0.6813,0.1054,-1.4438,0.0812,False
+es_testing,randomnn_testing,0.0946,0.9,-0.6679,0.8571,False
+es_testing,sa_testing,4.1747,0.001,3.4122,4.9372,True
+ga_testing,randomnn_testing,0.7759,0.0438,0.0134,1.5384,True
+ga_testing,sa_testing,4.856,0.001,4.0935,5.6185,True
+randomnn_testing,sa_testing,4.0801,0.001,3.3176,4.8426,True
