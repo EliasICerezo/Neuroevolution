@@ -1,4 +1,9 @@
 # Neuroevolution
+
+# Thesis
+Thesis pdf is available here: [Neuroevolution: Training with Metaheuristics](./Neuroevolution-TrainingwithMetaheuristics.pdf)
+
+# Execution
 For execution of the experiment:  
 
 * Get [Python 3](https://www.python.org/downloads/)
